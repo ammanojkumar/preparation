@@ -1,0 +1,219 @@
+JAVA (Latest 18)
+----------------
+Basic
+Collection
+
+Thread/Executor
+	java.util.concurrent package -> Executor, Future, ThreadFactory
+	ExecutorService executor = Executors.newSingleThreadExecutor();
+	ExecutorService executor2 = Executors.newFixedThreadPool(3);
+
+JAVA 8
+------
+Stream pipelining:
+1. FI - Predicate<T>.test, Function<T,R>.apply, Consumer<T>.accept, Supplier.get
+2. Inermediate operations - filter(Predicate<T>.test), map(Function<T,R>.apply),distinct,sorted,limit,skip
+3. Terminal operations - collect(), foreach(Consumer<T>.accept), count
+4. Streams configuration - filter, map
+5. Streams processing - collect, count, sorted, min, max, foreach, toarray, of
+6. Optional - Optional<> opt = Optional.of(), Optional.ofNullable(), boolean b = Optional.isPresent, ifPresent(consumer), 7. ifPresentOrElse(consumer,consumer),  orElse, OrElseGet, OrElseThrow 
+7. Short circuit operations - limit, findFirst, findAny, anyMatch, allMatch, noneMatch
+8. Hashmap internal working -> Java 8 replaces linkedlist to binarytree if threshold reached
+Examples:
+	1. Sum - reduce((a,b)->a+b)
+	2. Find duplicates - list.stream().filter(i -> Collections.frequency(list, i) > 1).collect(Collectors.toSet())
+	3. Find duplicates - list.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().filter(m -> m.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toSet());
+	4. Prime - IntStream.rangeClosed(2, num / 2).noneMatch(i -> num % i == 0)
+	5. Iterate - Stream.iterate(1, i -> i + 1).limit(10).forEach(System.out::print);
+	6. Min, max, sum, average - stream().mapToInt(x->x).summaryStatistics(); 
+	7. Split string - String names = ..collect(Collectors.joining(", ")
+	8. Even numbers - Stream.iterate(1, n -> n + 1).filter(n -> n % 2 == 0).limit(10).forEach(System.out::println);
+	9. rangeClosed - IntStream.rangeClosed(1, 10).forEach(System.out::print); rangeClosed until end value
+	10. Reduce - Arrays.stream(arr).reduce((a, b) -> a + b).getAsInt()
+	11. Perfect square - IntStream.rangeClosed(2, num / 2).anyMatch(i -> i * i == num)
+	12. map.entrySet().stream().sorted(Map.Entry.comparingByKey()).peek(e -> intList.add(e.getKey())).map(e -> e.getValue()).collect(Collectors.toList());
+	13. list.stream().mapToInt(Integer::valueOf).count();
+	14. Map2Map: Map Value Ordered - map.entrySet().stream().sorted((s1, s2) -> s1.getValue().getPercentage() - s2.getValue().getPercentage()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, HashMap::new));		
+
+DESIGN PATTERN
+-------------
+SOLID - Single Responsibilty Principle, Open/Closed Principle, Liskov Substitution, Interface Segregation, Dependency Inversion
+
+SPRING - LATEST VERSION 5.3
+--------------------------
+Features - Light weight, Loosly coupled, IOC, Spring container, AOP
+
+SPRING BOOT - LATEST VERSION 2.7.2
+----------------------------------
+RAD Rabid App Development, stand alone app, embbeded server (tom,jetty), auto config,
+compare to spring, boilerplate code and lot of configs removed 
+@SpringBootApplication -> @EnableAutoConfiguration, @ComponentScan, @Configuration 
+@value(${server.port})
+profile-> spring.profile.active
+-Rest
+-AOP
+	cross-cutting concerns., @Aspect, Advice, PointCut	
+	@Before("execution(* io.mk.logging.controller..*(..))")
+	@Around, @After, @AfterReturning, @AfterThrowing
+-Swagger 
+	Swagger2 is an open source project used to generate the REST API documents for RESTful web services. It provides a user interface to access our RESTful web services via the web browser.	
+	@EnableSwagger2 at component class
+	return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
+					.paths(PathSelectors.ant("/physician/*")).build().apiInfo(apiEndPointsInfo());
+	@Api(value = "Physician controller") at class
+	@ApiOperation(value = "Get Physician", response = Physician.class) at method
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully retrieved Physician") })
+-Annotations
+	@Qualifier, @Primary
+-Actuator - monitor and manage app.
+	management.endpoints.web.exposure.include=*
+	management.endpoints.web.path-mapping.health=hlth // rename
+	custom - @Endpoint(id = "appStatus") at class, @ReadOperation(@Selector)/@WriteOperation/@DeleteOperation at method
+	urls: Health, Info, Beans, Mappings, Configprops, Httptrace, Heapdump, Threaddump, Shutdown
+-Security
+	Knowledge based (pwd, pin, security questions), Possession based (otp, key/batch, access token), Mixed
+	spring.security.user/password
+	@enableWebSecurity
+	public class CustomSecurityConfig extends WebSecurityCongurerAdapter {
+	@override configure mhd
+	@override configure(HttpSecurity) mhd2
+	httpSecurity.authorizeRequests().antMatchers("/employee/admin").hasRole("ADMIN").permitAll().and().formLogin();
+
+-JPA spring.datasource.url...spring.jpa.properties.hibernate.dialect,spring.jpa.hibernate.ddl-auto=update
+
+-Exception
+	Handling exceptions and errors in APIs and sending the proper response to the client is good for enterprise applications.
+	@ControllerAdvice, @ExceptionHandler
+
+-Cache
+spring.cache.jcache.config=classpath:ehcache.xml
+@Cacheable(cacheNames = "tvCache", key = "#channelId") at method
+
+-Mongodb
+@Document(collection = "TVChannel") at class
+spring.data.mongodb.host=localhost
+spring.data.mongodb.port=27017
+spring.data.mongodb.database=TVChannelDB
+
+
+
+-Test
+@RunWith(SpringRunner.class)
+@WebMvcTest(WelcomeController.class)
+this.mockMvc.perform(get("/welcomeme")).andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString("You are welcome")));
+
+-batch
+	JobLauncher->Job->Step->ItemReader/ItemProcessor/ItemWriter
+	
+-Scheduler
+	@EnableScheduling
+	@Scheduled(cron = "1/8 * * * * *")
+	@Scheduled(fixedDelay = 3000)
+	
+SPRING CLOUD (microservices)
+----------------------------
+-Eureka
+	Service registry
+	eureka.client.service-url.defaultZone
+-Zuul
+	Zuul is a JVM-based router and server-side load balancer from Netflix. Zuul is the front door for all requests from devices and web sites to the backend of the Netflix streaming application
+-Ribbon
+	Ribbon is a client-side load balancer that gives you a lot of control over the behavior of HTTP and TCP clients
+-Config server
+	spring.profiles.active=dev
+	spring.cloud.config.uri=http://localhost:8888
+	spring.cloud.config.server.native.searchLocations=classpath:conf-files/
+-Kafka
+	Apache Kafka is an open source project used to publish and subscribe the messages based on the fault-tolerant messaging system
+	producer1,2,.. -> Kafka cluster (Broker1 (Topic1 (Partition1,2,..) ,Topic2,..), Broker2,.. ) on ZooKeeper -> consumer1,2,..
+	Puplisher (Producer)
+		kafkaTemplate.send("topic", object);
+		Map<String, Object> configs = new HashMap<>();
+		configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+		configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+		return new DefaultKafkaProducerFactory<String, Object>(configs);
+	Subscriber (Consumer)
+		@EnableKafka
+		@KafkaListener
+		Map<String, Object> configs = new HashMap<>();
+		configs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		configs.put(ConsumerConfig.GROUP_ID_CONFIG, "javatechie-1");
+		return new DefaultKafkaConsumerFactory<>(configs);
+	Features
+		Fault tolerance, Replication, Scalability, High volume, Performance
+	
+	
+-Feign
+	Feign is a declarative web service client. It makes writing web service clients easier. To use Feign create an interface and annotate it. 
+-Hystrix
+	Hystrix that implements the circuit breaker pattern. In a microservice architecture, it is common to have multiple layers of service calls
+	@HystrixCommand(fallbackMethod = "defaultStores")
+
+HIBERNATE 
+---------
+spring.datasource.url
+spring.jpa.properties.dialect.hibernate
+-states
+-1st level cache (session level/Local), 2nd level cache (SessionFactoty level/Global, EHCache)
+-save update merge
+
+MAVEN
+-----
+-scope
+-depmgmt
+
+KUBERNETES
+----------
+kind: Service
+kind: Deployment
+
+kubectl apply -f currency-po.yml
+kubectl exec pod/currency-service-fd8bbb8f9-wfft7 -it -- bash
+
+DOCKER
+------
+Dockerfile
+FROM openjdk:11.0.2-jdk
+WORKDIR /app
+COPY ./target/currency-service-0.0.1-SNAPSHOT.jar /app
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "java -jar currency-service-0.0.1-SNAPSHOT.jar"]
+
+docker build -t currency-service:0.0.1 .
+docker run -it -p 8080:8080 currency-service
+
+DATABASE
+--------
+MongoDB - MongoDB is an open-source document database and leading NoSQL database. RDBMS->Mongo, Table->Collection, Row->Document, column->Field
+h2db - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+
+INTERVIEW QUESTIONS
+-------------------
+1. what makes sting immutable
+2. cloud config server
+3. how to configure monitor, micro services (actuator) change url
+4. how hashmap works internally
+5. how set works internally
+6. parllel vs normal stream
+7. optional
+8. hashcode equals contract
+8. wait an notify
+8. functional interface
+9. PCF 
+10. Java 8 memory management update
+
+1. log vulnerability
+2. spring boot scheduler
+3. spring boot batch
+4. JMS
+5. MongoDB
+6. Kafka
+
+1. Why wait and notify is declared in Object class instead of Thread? 
+2. Why are multiple inheritances not supported in Java but in java 8? 
+4. Why is String immutable in Java? 
+5. Why char array is preferred to store passwords than a String in Java? 
+What happens if your Serializable class contains a member which is not serializable? How to fix
