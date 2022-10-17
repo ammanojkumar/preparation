@@ -2,48 +2,84 @@ JAVA (Latest 18)
 ----------------
 Basic
 Collection
+String
 
-Thread/Executor
+Thread/Executor - An object that executes submitted Runnable tasks.
 	java.util.concurrent package -> Executor, Future, ThreadFactory
 	ExecutorService executor = Executors.newSingleThreadExecutor();
 	ExecutorService executor2 = Executors.newFixedThreadPool(3);
 
+Java 11
+-------
+String class: isBlank, lines, strip, stripLeading, stripTrailing, and repeat.
+List<String> lines = multilineString.lines().filter(line -> !line.isBlank()).map(String::strip).collect(Collectors.toList());
+
+Path filePath = Files.writeString(Files.createTempFile(tempDir, "demo", ".txt"), "Sample text");
+String fileContent = Files.readString(filePath);
+
+List to array -> String[] sampleArray = sampleList.toArray(String[]::new);
+..filter(Predicate.not(String::isBlank))
+..map((@Nonnull var x) -> x.toUpperCase())
+
+we don't need to compile the Java source files with javac explicitly anymore:
+$ java HelloWorld.java
+
 JAVA 8
 ------
-Stream pipelining:
-1. FI - Predicate<T>.test, Function<T,R>.apply, Consumer<T>.accept, Supplier.get
-2. Inermediate operations - filter(Predicate<T>.test), map(Function<T,R>.apply),distinct,sorted,limit,skip
-3. Terminal operations - collect(), foreach(Consumer<T>.accept), count
-4. Streams configuration - filter, map
-5. Streams processing - collect, count, sorted, min, max, foreach, toarray, of
-6. Optional - Optional<> opt = Optional.of(), Optional.ofNullable(), boolean b = Optional.isPresent, ifPresent(consumer), 7. ifPresentOrElse(consumer,consumer),  orElse, OrElseGet, OrElseThrow 
-7. Short circuit operations - limit, findFirst, findAny, anyMatch, allMatch, noneMatch
-8. Hashmap internal working -> Java 8 replaces linkedlist to binarytree if threshold reached
+Stream:
+1. Function Intertface: Function<T,R>.apply, Predicate<T>.test, Consumer<T>.accept, Supplier.get 
+2. Inermediate operations: filter(Predicate<T>.test), map(Function<T,R>.apply), peek(Consumer), distinct, sorted, limit, skip
+3. Terminal operations: collect(), foreach(Consumer<T>.accept), count, noneMatch, anyMatch, allMatch, findFirst, findAny, forEach
+4. Optional - Optional is a container object which may or may not contain a non-null value
+	Optional<> opt = Optional.of()/Optional.ofNullable(); boolean val = opt.isPresent(), .ifPresent(consumer), .ifPresentOrElse(consumer,runnable),
+	.orElse(obj), .orElseGet(supplier), .orElseThrow(supplier)
+5. Date API: Thread safety, API design and Ease code, ZonedDate and Time
+	import java.time.LocalDateTime; LocalDateTime.now() -> 2022-09-20T08:20:49.753512600
+	LocalTime sixThirty = LocalTime.parse("06:30");LocalDateTime.of(2015, Month.FEBRUARY, 20, 06, 30); ZoneId zoneId = ZoneId.of("Europe/Paris");
+	LocalDate.parse("2016-06-12").isBefore(LocalDate.parse("2016-06-11"));
+	long diff = ChronoUnit.DAYS.between(LocalDate, LocalDate); long diff = ChronoUnit.SECONDS.between(DateTime, DateTime);
+6. Short circuit operations - limit, noneMatch, anyMatch, allMatch, findFirst, findAny
+
 Examples:
-	1. Sum - reduce((a,b)->a+b)
-	2. Find duplicates - list.stream().filter(i -> Collections.frequency(list, i) > 1).collect(Collectors.toSet())
-	3. Find duplicates - list.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().filter(m -> m.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toSet());
-	4. Prime - IntStream.rangeClosed(2, num / 2).noneMatch(i -> num % i == 0)
-	5. Iterate - Stream.iterate(1, i -> i + 1).limit(10).forEach(System.out::print);
-	6. Min, max, sum, average - stream().mapToInt(x->x).summaryStatistics(); 
-	7. Split string - String names = ..collect(Collectors.joining(", ")
-	8. Even numbers - Stream.iterate(1, n -> n + 1).filter(n -> n % 2 == 0).limit(10).forEach(System.out::println);
-	9. rangeClosed - IntStream.rangeClosed(1, 10).forEach(System.out::print); rangeClosed until end value
-	10. Reduce - Arrays.stream(arr).reduce((a, b) -> a + b).getAsInt()
-	11. Perfect square - IntStream.rangeClosed(2, num / 2).anyMatch(i -> i * i == num)
-	12. map.entrySet().stream().sorted(Map.Entry.comparingByKey()).peek(e -> intList.add(e.getKey())).map(e -> e.getValue()).collect(Collectors.toList());
-	13. list.stream().mapToInt(Integer::valueOf).count();
-	14. Map2Map: Map Value Ordered - map.entrySet().stream().sorted((s1, s2) -> s1.getValue().getPercentage() - s2.getValue().getPercentage()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, HashMap::new));		
+	1. int sum = intList.stream().mapToInt(Integer::valueOf).sum(); 
+	2. Min, max, sum, average - stream().mapToInt(x -> x).summaryStatistics(); 
+	3. list.stream().mapToInt(Integer::valueOf).count();
+	4. Sum by reduce - Arrays.stream(intArr).reduce((a, b) -> a + b).getAsInt();
+	5. Find duplicates - list.stream().filter(i -> Collections.frequency(list, i) > 1).collect(Collectors.toSet())
+	6. Find duplicates - list.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
+		filter(m -> m.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toSet());
+	7. Prime - IntStream.rangeClosed(2, num / 2).noneMatch(i -> num % i == 0)
+	8. rangeClosed - IntStream.rangeClosed(1, 10).forEach(System.out::print); rangeClosed until end value
+	9. Perfect square - IntStream.rangeClosed(2, num / 2).anyMatch(i -> i * i == num)
+	10. Iterate - Stream.iterate(1, i -> i + 1).limit(10).forEach(System.out::print);
+	11. Even numbers - Stream.iterate(1, n -> n + 1).filter(n -> n % 2 == 0).limit(10).forEach(System.out::println);	
+	12. Split string - String names = ..collect(Collectors.joining(", ")
+	13. map.entrySet().stream().sorted(Map.Entry.comparingByKey()).peek(e -> intList.add(e.getKey())).
+		map(e -> e.getValue()).collect(Collectors.toList());
+	14. Map2Map: Map Value Ordered - map.entrySet().stream().sorted((s1, s2) -> s1.getValue().getPercentage() - s2.getValue().getPercentage())
+		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, HashMap::new));
+
+Hashmap internal working -> Java 8 replaces linkedlist to binarytree if threshold reached
+map vs flatMap
+stream vs parllelStream
+Method reference: Static method, Instance method, constructor
 
 DESIGN PATTERN
 -------------
 SOLID - Single Responsibilty Principle, Open/Closed Principle, Liskov Substitution, Interface Segregation, Dependency Inversion
+Builder, Factory, AbstractFactory, Singleton
+
+Microservices Design Patterns: API Gateway, Asynchronous Messaging, Database
+
+Spring Framework Design Patterns: Inversion of Control (IOC), Proxy Pattern,Singleton Pattern, Factory Pattern, Decorator Pattern, Strategy Pattern
+This pattern is used by spring to load beans using 
+BeanFactory and ApplicationContext. 
 
 SPRING - LATEST VERSION 5.3
 --------------------------
 Features - Light weight, Loosly coupled, IOC, Spring container, AOP
 
-SPRING BOOT - LATEST VERSION 2.7.2
+SPRING BOOT - LATEST VERSION 2.7.4
 ----------------------------------
 RAD Rabid App Development, stand alone app, embbeded server (tom,jetty), auto config,
 compare to spring, boilerplate code and lot of configs removed 
@@ -52,17 +88,17 @@ compare to spring, boilerplate code and lot of configs removed
 profile-> spring.profile.active
 -Rest
 -AOP
-	cross-cutting concerns., @Aspect, Advice, PointCut	
+	cross-cutting concerns., @Aspect, @Advice, @PointCut	
 	@Before("execution(* io.mk.logging.controller..*(..))")
 	@Around, @After, @AfterReturning, @AfterThrowing
--Swagger 
+-Swagger
 	Swagger2 is an open source project used to generate the REST API documents for RESTful web services. It provides a user interface to access our RESTful web services via the web browser.	
 	@EnableSwagger2 at component class
 	return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
 					.paths(PathSelectors.ant("/physician/*")).build().apiInfo(apiEndPointsInfo());
 	@Api(value = "Physician controller") at class
 	@ApiOperation(value = "Get Physician", response = Physician.class) at method
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully retrieved Physician") })
+	@ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully retrieved Physician")})
 -Annotations
 	@Qualifier, @Primary
 -Actuator - monitor and manage app.
@@ -79,7 +115,9 @@ profile-> spring.profile.active
 	@override configure(HttpSecurity) mhd2
 	httpSecurity.authorizeRequests().antMatchers("/employee/admin").hasRole("ADMIN").permitAll().and().formLogin();
 
--JPA spring.datasource.url...spring.jpa.properties.hibernate.dialect,spring.jpa.hibernate.ddl-auto=update
+Rest-api-request-validation
+    @Column(nullable = false, length = 512, unique = true)
+
 
 -Exception
 	Handling exceptions and errors in APIs and sending the proper response to the client is good for enterprise applications.
@@ -94,8 +132,6 @@ spring.cache.jcache.config=classpath:ehcache.xml
 spring.data.mongodb.host=localhost
 spring.data.mongodb.port=27017
 spring.data.mongodb.database=TVChannelDB
-
-
 
 -Test
 @RunWith(SpringRunner.class)
@@ -148,22 +184,54 @@ SPRING CLOUD (microservices)
 	
 -Feign
 	Feign is a declarative web service client. It makes writing web service clients easier. To use Feign create an interface and annotate it. 
+	@FeignClient(url = "http://desktop-asas:7001/", name = "insurance-service")
+	public interface AccFeignClient {
+		@RequestMapping(value = "balance/{accNumber}")
+		public String getBalance(@PathVariable String accNumber);
+	}
 -Hystrix
 	Hystrix that implements the circuit breaker pattern. In a microservice architecture, it is common to have multiple layers of service calls
-	@HystrixCommand(fallbackMethod = "defaultStores")
+	@HystrixCommand(fallbackMethod = "defaultStores",
+	 commandProperties = {
+       @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "3000"),
+       @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value="60")
+    })
+	
+-LoadBalanced
 
-HIBERNATE 
----------
+-Springbbot integration test
+
+Spring bean scope
+singleton
+prototype
+request
+session
+application
+websocket
+
+HIBERNATE/JPA 
+-------------
 spring.datasource.url
 spring.jpa.properties.dialect.hibernate
 -states
 -1st level cache (session level/Local), 2nd level cache (SessionFactoty level/Global, EHCache)
 -save update merge
+-connect multiple db
+	database1.datasource.url=jdbc:mysql://localhost/testdb
+	database1.datasource.username=root
+	database2.datasource.url=jdbc:mysql://localhost/testdb2
+	@Bean(name = "datasource1")
+	@ConfigurationProperties("database1.datasource")
+	@Primary
+	public DataSource dataSource(){
+		return DataSourceBuilder.create().build();
+	}
+	..
 
 MAVEN
 -----
--scope
--depmgmt
+-scope (Compile-default, Runtime, Provided, Test, System, import)
+-dependency & dependency management
 
 KUBERNETES
 ----------
@@ -189,6 +257,13 @@ DATABASE
 --------
 MongoDB - MongoDB is an open-source document database and leading NoSQL database. RDBMS->Mongo, Table->Collection, Row->Document, column->Field
 h2db - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+
+AZURE - platform as a service (PaaS)
+-----
+
+PCF - Paas
+---
+
 
 INTERVIEW QUESTIONS
 -------------------
@@ -216,4 +291,15 @@ INTERVIEW QUESTIONS
 2. Why are multiple inheritances not supported in Java but in java 8? 
 4. Why is String immutable in Java? 
 5. Why char array is preferred to store passwords than a String in Java? 
-What happens if your Serializable class contains a member which is not serializable? How to fix
+6. What happens if your Serializable class contains a member which is not serializable? How to fix
+
+Stub service
+Karate
+New man
+Typescript
+Observable (rxjs
+
+Azure cloud
+ create resources group
+ create app service
+ select deployment server
