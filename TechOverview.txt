@@ -1,8 +1,13 @@
-JAVA (Latest 18)
+JAVA (Latest 19) sep 2022
 ----------------
 Basic
 Collection
 String
+
+Thread life cyle - New, Runnable, Blocked/Waiting, Timed Waiting, Terminated
+HashSet internal work - It uses Hashmap internaly. When add element it will add in to hashmap as a key with value as PRESENT
+HashMap internal work - It uses an array of the node is called buckets and LinkedList data structure internally for storing Key and Value. The default size of HashMap is 16. To store the key it create a calculate index value and store it in particular node.
+Hash Collision - If index is same, it will create new node next to present  node in LinkedList. Java 8 replaces linkedlist to binarytree if threshold reached
 
 Thread/Executor - An object that executes submitted Runnable tasks.
 	java.util.concurrent package -> Executor, Future, ThreadFactory
@@ -11,84 +16,153 @@ Thread/Executor - An object that executes submitted Runnable tasks.
 
 Java 11
 -------
-String class: isBlank, lines, strip, stripLeading, stripTrailing, and repeat.
+1. String methods: 1.isBlank, 2.lines, 3.strip (remove whitespaces front & back as trim+unicode chars), 4.stripLeading, 5.stripTrailing 6.repeat
 List<String> lines = multilineString.lines().filter(line -> !line.isBlank()).map(String::strip).collect(Collectors.toList());
 
-Path filePath = Files.writeString(Files.createTempFile(tempDir, "demo", ".txt"), "Sample text");
+2. Path filePath = Files.writeString(Files.createTempFile(tempDir, "demo", ".txt"), "Sample text");
 String fileContent = Files.readString(filePath);
 
-List to array -> String[] sampleArray = sampleList.toArray(String[]::new);
-..filter(Predicate.not(String::isBlank))
-..map((@Nonnull var x) -> x.toUpperCase())
+3. List to array -> String[] sampleArray = sampleList.toArray(String[]::new);
+4. ..filter(Predicate.not(String::isBlank))		..map((@Nonnull var x) -> x.toUpperCase())
 
-we don't need to compile the Java source files with javac explicitly anymore:
-$ java HelloWorld.java
+5.we don't need to compile the Java source files with javac explicitly anymore: $ java HelloWorld.java
 
 JAVA 8
 ------
-Stream:
-1. Function Intertface: Function<T,R>.apply, Predicate<T>.test, Consumer<T>.accept, Supplier.get 
+Features - Lambda expressions, Method references, Stream API, Functional interfaces with Default methods, Static methods, Optional class, Collectors class, ForEach() method,
+
+Stream: a sequence of objects that supports various methods which can be pipelined to produce the desired result. 
+1. Function Intertface: Interface contains one abstract method. Can have any number of default, static methods. SAM interface
+	Function<T,R>.apply, Predicate<T>.test, Consumer<T>.accept, Supplier.get 
+	DF: Function.andThen Predicate.(and, or, negate), Consumer.andThen
 2. Inermediate operations: filter(Predicate<T>.test), map(Function<T,R>.apply), peek(Consumer), distinct, sorted, limit, skip
-3. Terminal operations: collect(), foreach(Consumer<T>.accept), count, noneMatch, anyMatch, allMatch, findFirst, findAny, forEach
+3. Terminal operations: collect(), foreach(Consumer<T>.accept), count, noneMatch, anyMatch, allMatch, findFirst, findAny
 4. Optional - Optional is a container object which may or may not contain a non-null value
 	Optional<> opt = Optional.of()/Optional.ofNullable(); boolean val = opt.isPresent(), .ifPresent(consumer), .ifPresentOrElse(consumer,runnable),
 	.orElse(obj), .orElseGet(supplier), .orElseThrow(supplier)
-5. Date API: Thread safety, API design and Ease code, ZonedDate and Time
+5. Date API: Thread safety (before its not), API design and Ease code, ZonedDate and Time
 	import java.time.LocalDateTime; LocalDateTime.now() -> 2022-09-20T08:20:49.753512600
 	LocalTime sixThirty = LocalTime.parse("06:30");LocalDateTime.of(2015, Month.FEBRUARY, 20, 06, 30); ZoneId zoneId = ZoneId.of("Europe/Paris");
 	LocalDate.parse("2016-06-12").isBefore(LocalDate.parse("2016-06-11"));
 	long diff = ChronoUnit.DAYS.between(LocalDate, LocalDate); long diff = ChronoUnit.SECONDS.between(DateTime, DateTime);
-6. Short circuit operations - limit, noneMatch, anyMatch, allMatch, findFirst, findAny
 
+Functions:
+	1. mapToInt:			int sum = intList.stream().mapToInt(Integer::valueOf).sum();
+	2. summaryStatistics:	Min, max, sum, average - stream().mapToInt(x -> x).summaryStatistics();
+	3. count:				list.stream().mapToInt(Integer::valueOf).count();
+	4. reduce:				Arrays.stream(intArr).reduce((a, b) -> a + b).getAsInt();
+	5. rangeClosed:			IntStream.rangeClosed(1, 10).forEach(System.out::print); rangeClosed until end value
+	6. iterate & limit:		Stream.iterate(1, i -> i + 1).limit(10).forEach(System.out::print);
 Examples:
-	1. int sum = intList.stream().mapToInt(Integer::valueOf).sum(); 
-	2. Min, max, sum, average - stream().mapToInt(x -> x).summaryStatistics(); 
-	3. list.stream().mapToInt(Integer::valueOf).count();
-	4. Sum by reduce - Arrays.stream(intArr).reduce((a, b) -> a + b).getAsInt();
-	5. Find duplicates - list.stream().filter(i -> Collections.frequency(list, i) > 1).collect(Collectors.toSet())
-	6. Find duplicates - list.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
-		filter(m -> m.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toSet());
-	7. Prime - IntStream.rangeClosed(2, num / 2).noneMatch(i -> num % i == 0)
-	8. rangeClosed - IntStream.rangeClosed(1, 10).forEach(System.out::print); rangeClosed until end value
-	9. Perfect square - IntStream.rangeClosed(2, num / 2).anyMatch(i -> i * i == num)
-	10. Iterate - Stream.iterate(1, i -> i + 1).limit(10).forEach(System.out::print);
-	11. Even numbers - Stream.iterate(1, n -> n + 1).filter(n -> n % 2 == 0).limit(10).forEach(System.out::println);	
-	12. Split string - String names = ..collect(Collectors.joining(", ")
-	13. map.entrySet().stream().sorted(Map.Entry.comparingByKey()).peek(e -> intList.add(e.getKey())).
+	1. Find duplicates:	list.stream().filter(val -> Collections.frequency(list, val) > 1).collect(Collectors.toSet())
+	2. Find duplicates:	list.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
+		filter(ent -> ent.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toSet());
+	3. Prime:			IntStream.rangeClosed(2, num / 2).noneMatch(i -> num % i == 0) 
+	4. Perfect square:	IntStream.rangeClosed(2, num / 2).anyMatch(i -> i * i == num)
+	5. Even numbers:	Stream.iterate(1, n -> n + 1).filter(n -> n % 2 == 0).limit(10).forEach(System.out::println);	
+	6. Split string:	String names = ..collect(Collectors.joining(", ")
+	7. map.entrySet().stream().sorted(Map.Entry.comparingByKey()).peek(e -> intList.add(e.getKey())).
 		map(e -> e.getValue()).collect(Collectors.toList());
-	14. Map2Map: Map Value Ordered - map.entrySet().stream().sorted((s1, s2) -> s1.getValue().getPercentage() - s2.getValue().getPercentage())
+	8. Map2Map: Map Value Ordered - map.entrySet().stream().sorted((s1, s2) -> s1.getValue().getPercentage() - s2.getValue().getPercentage())
 		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, HashMap::new));
 
-Hashmap internal working -> Java 8 replaces linkedlist to binarytree if threshold reached
 map vs flatMap
-stream vs parllelStream
-Method reference: Static method, Instance method, constructor
-
+stream vs parllelStream works based on no. of cps cores. We can set also (-D java.util.concurrent.ForkJoinPool.common.parallelism=4)
+Method reference
+Static MR - StaticMethodReference::saySomething
+Instance MR - instanceReference::saySomething
+Constructor MR - ClassName::new
+ 
 DESIGN PATTERN
 -------------
-SOLID - Single Responsibilty Principle, Open/Closed Principle, Liskov Substitution, Interface Segregation, Dependency Inversion
+SOLID - 1.Single Responsibilty Principle, 2.Open/Closed Principle, 3.Liskov Substitution, 4.Interface Segregation, 5.Dependency Inversion
 Builder, Factory, AbstractFactory, Singleton
-
 Microservices Design Patterns: API Gateway, Asynchronous Messaging, Database
-
-Spring Framework Design Patterns: Inversion of Control (IOC), Proxy Pattern,Singleton Pattern, Factory Pattern, Decorator Pattern, Strategy Pattern
+Spring Framework Design Patterns: Inversion of Control (IOC), Proxy Pattern, Singleton Pattern, Factory Pattern, Decorator Pattern, Strategy Pattern
 This pattern is used by spring to load beans using 
 BeanFactory and ApplicationContext. 
 
-SPRING - LATEST VERSION 5.3
---------------------------
-Features - Light weight, Loosly coupled, IOC, Spring container, AOP
+MAVEN
+-----
+<dependencies> - If you add in the parent pom, always included into child. No need to mention in child.
+<dependencyManagement> - If you add in the parent pom, you need to add it in child if required, but version and scope is refered from parent
+-scope (Compile-default, Runtime, Provided, Test, System, import)
 
-SPRING BOOT - LATEST VERSION 2.7.4
-----------------------------------
-RAD Rabid App Development, stand alone app, embbeded server (tom,jetty), auto config,
-compare to spring, boilerplate code and lot of configs removed 
-@SpringBootApplication -> @EnableAutoConfiguration, @ComponentScan, @Configuration 
+SPRING - LATEST VERSION 5.3
+---------------------------
+Features - Light weight, Loosly coupled, IOC, Spring IOC container, AOP
+
+SPRING BOOT - LATEST VERSION 3.0 - Dec 2022
+================================
+@SpringBootApplication -> @Configuration, @EnableAutoConfiguration, @ComponentScan 
+SpringApplication.run(OurMainClass.class, args);
+public ConfigurableApplicationContext run(String... args) {
+}
+
+@Configuration - indicates that the class has @Bean definition methods. So Spring container can process the class and generate Spring Beans to be used in the application.
+
+@EnableAutoConfiguration - Inside spring-boot-autoconfigure.jar -> inside Spring.factroies file all the initializers, listerners, Processors, Filters, Failure analyzers are added
+
+@ComponentScan - is used with the @Configuration annotation to tell Spring the packages to scan for annotated components.
+
+JpaRepositoriesAutoConfiguration.class
+@ConditionalOnBean(DataSource.class)
+@ConditionalOnClass(JpaRepository.class)
+@ConditionalOnMissingBean({ JpaRepositoryFactoryBean.class, JpaRepositoryConfigExtension.class })
+@ConditionalOnProperty(prefix = "spring.data.jpa.repositories", name = "enabled", havingValue = "true",
+		matchIfMissing = true)
+@Import(JpaRepositoriesImportSelector.class)
+
+IoC container - responsible to instantiate, configure and assemble the objects. The IoC container gets informations from the XML file and works accordingly. Two types,
+1. BeanFactory
+2. ApplicationContext 
+
+The ApplicationContext interface is built on top of the BeanFactory interface. Spring holds instances of objects that it has identified to be managed and distributed automatically.
+ApplicationContext context =  new ClassPathXmlApplicationContext("applicationContext.xml");
+
+Resource resource=new ClassPathResource("applicationContext.xml");  
+BeanFactory factory=new XmlBeanFactory(resource);
+
+Dependency Injection - The Dependency Injection is a design pattern that removes the dependency of the programs. Ways to inject dependency,
+1. Constructor DI
+2. Setter method DI
+3. Property based DI
+
+Spring Vs Spring boot
+---------------------
+Spring - Java EE development easier. Requires too many lines of code (boilerplate code) even for minimal tasks. build configurations manual.
+Spring Boot - provides the RAD feature to the Spring framework for faster application. Provides stand alone application with built-in or embedded servers such as Tomcat and jetty. No need for the Deployment descriptor. Provides profiels. Support for the in-memory database such as H2. Default configurations allows faster bootstrapping. Provides a CLI tool, build tool plugins for Maven and Gradle.
+
 @value(${server.port})
-profile-> spring.profile.active
+profile -> spring.profile.active
+Scopes
+------
+1. Singleton:	Only one instance of the spring bean will be created for the spring container. default spring bean scope
+2. Prototype:	A new instance will be created every time the bean is requested from the spring container
+3. Request:		It is used for web applications. A new instance of the bean will be created for each HTTP request
+4. Session:		A new bean will be created for each HTTP session by the container
+5. Application:	The application scope creates the bean instance for the lifecycle of a ServletContext
+6. WebSocket:	WebSocket scoped beans are stored in the WebSocket session attributes.
+
+Thymeleaf - is a server-side Java template engine used for web applications. It aims to bring natural template for your web application and can integrate well with Spring Framework and HTML5 Java web applications
+
+DevTools - Spring Boot includes an additional set of tools that can make the application development experience a little more pleasant
+
+Spring Bean Life Cycle
+InitializingBean with afterPropertiesSet()
+DisposableBean with destroy()
+public class EmployeeService implements InitializingBean, DisposableBean{
+	public void afterPropertiesSet() throws Exception {
+	public void destroy() throws Exception {
+}
+Spring framework also support @PostConstruct and @PreDestroy annotations for defining post-init and pre-destroy methods.
+
+CommandLineRunner -  Spring Boot will automatically call the run method of all beans implementing this interface after the application context has been loaded.
+custom auto-configuration
+
 -Rest
 -AOP
-	cross-cutting concerns., @Aspect, @Advice, @PointCut	
+	Cross-cutting concerns., @Aspect, @Advice, @PointCut	
 	@Before("execution(* io.mk.logging.controller..*(..))")
 	@Around, @After, @AfterReturning, @AfterThrowing
 -Swagger
@@ -101,7 +175,11 @@ profile-> spring.profile.active
 	@ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully retrieved Physician")})
 -Annotations
 	@Qualifier, @Primary
--Actuator - monitor and manage app.
+	@Lookup
+	Stereotype annotations - Annotations denoting the roles of methods in the overall architecture
+	-> @Component, @Controller, @Service, @Repository
+-Actuator
+	Actuator is used to monitor and manage the Spring web application.
 	management.endpoints.web.exposure.include=*
 	management.endpoints.web.path-mapping.health=hlth // rename
 	custom - @Endpoint(id = "appStatus") at class, @ReadOperation(@Selector)/@WriteOperation/@DeleteOperation at method
@@ -110,14 +188,17 @@ profile-> spring.profile.active
 	Knowledge based (pwd, pin, security questions), Possession based (otp, key/batch, access token), Mixed
 	spring.security.user/password
 	@enableWebSecurity
-	public class CustomSecurityConfig extends WebSecurityCongurerAdapter {
-	@override configure mhd
+	UserDetails -> getUsername, getPassword, getAuthorities..
+	UserDetailsService -> loadUserByUsername
+	public class CustomSecurityConfig extends WebSecurityCongurerAdapter { // extends WebSecurityCongurerAdapter deprecated	
 	@override configure(HttpSecurity) mhd2
-	httpSecurity.authorizeRequests().antMatchers("/employee/admin").hasRole("ADMIN").permitAll().and().formLogin();
+	httpSecurity.authorizeRequests().antMatchers("/employee/admin").hasRole("ADMIN").permitAll().and().formLogin();}
+	Instead we can use this bean
+	@Bean
+	public SecurityFilterChain configure(HttpSecurity http) throws Exception {}
 
 Rest-api-request-validation
     @Column(nullable = false, length = 512, unique = true)
-
 
 -Exception
 	Handling exceptions and errors in APIs and sending the proper response to the client is good for enterprise applications.
@@ -127,16 +208,16 @@ Rest-api-request-validation
 spring.cache.jcache.config=classpath:ehcache.xml
 @Cacheable(cacheNames = "tvCache", key = "#channelId") at method
 
--Mongodb
-@Document(collection = "TVChannel") at class
-spring.data.mongodb.host=localhost
-spring.data.mongodb.port=27017
-spring.data.mongodb.database=TVChannelDB
-
 -Test
 @RunWith(SpringRunner.class)
 @WebMvcTest(WelcomeController.class)
+Get Test
 this.mockMvc.perform(get("/welcomeme")).andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString("You are welcome")));
+Post Test
+when(welcomeService.welcomeAll(any(Club.class))).thenReturn("Welcome All");
+MvcResult response = this.mockMvc.perform(post("/welcomeall").content(new ObjectMapper().writeValueAsString(club))
+		.contentType(MediaType.APPLICATION_JSON))
+		.andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString("Welcome All"))).andReturn();
 
 -batch
 	JobLauncher->Job->Step->ItemReader/ItemProcessor/ItemWriter
@@ -155,10 +236,25 @@ SPRING CLOUD (microservices)
 	Zuul is a JVM-based router and server-side load balancer from Netflix. Zuul is the front door for all requests from devices and web sites to the backend of the Netflix streaming application
 -Ribbon
 	Ribbon is a client-side load balancer that gives you a lot of control over the behavior of HTTP and TCP clients
--Config server
-	spring.profiles.active=dev
-	spring.cloud.config.uri=http://localhost:8888
-	spring.cloud.config.server.native.searchLocations=classpath:conf-files/
+-Cloud Config Gateway
+	cloud:
+		gateway:
+			routes:
+			- id: /welcome
+			uri: localhost:9999
+-Cloud Config server
+	Store and serve properties for distributed configurations across multiple applications and environments
+	Client
+		spring.profiles.active=dev
+		sprng.cloud.config.uri=http://localhost:8888
+	Server
+		@EnableConfigServer at server
+		spring.cloud.config.server.native.searchLocations=classpath:conf-files/
+		spring.cloud.config.server.git.uri=https://...configs.git
+										username: xyz
+										password: xyz
+										basedir: target/configs
+
 -Kafka
 	Apache Kafka is an open source project used to publish and subscribe the messages based on the fault-tolerant messaging system
 	producer1,2,.. -> Kafka cluster (Broker1 (Topic1 (Partition1,2,..) ,Topic2,..), Broker2,.. ) on ZooKeeper -> consumer1,2,..
@@ -190,7 +286,7 @@ SPRING CLOUD (microservices)
 		public String getBalance(@PathVariable String accNumber);
 	}
 -Hystrix
-	Hystrix that implements the circuit breaker pattern. In a microservice architecture, it is common to have multiple layers of service calls
+	Hystrix implements the circuit breaker pattern. In a microservice architecture, it is common to have multiple layers of service calls
 	@HystrixCommand(fallbackMethod = "defaultStores",
 	 commandProperties = {
        @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "3000"),
@@ -199,20 +295,15 @@ SPRING CLOUD (microservices)
 	
 -LoadBalanced
 
--Springbbot integration test
-
-Spring bean scope
-singleton
-prototype
-request
-session
-application
-websocket
+-Springboot integration test
+	Test Class - @SpringBootTest, @AutoConfigureMockMvc, @TestPropertySource, @TestConfiguration
+	@Autowired MockMvc, 
+	@MockBean Service
 
 HIBERNATE/JPA 
 -------------
-spring.datasource.url
-spring.jpa.properties.dialect.hibernate
+spring.datasource.url, .username, .password, .driver-class-name
+spring.jpa.properties.dialect.hibernate=org.hibernate.dialect.MySQL5Dialect
 -states
 -1st level cache (session level/Local), 2nd level cache (SessionFactoty level/Global, EHCache)
 -save update merge
@@ -228,10 +319,6 @@ spring.jpa.properties.dialect.hibernate
 	}
 	..
 
-MAVEN
------
--scope (Compile-default, Runtime, Provided, Test, System, import)
--dependency & dependency management
 
 KUBERNETES
 ----------
@@ -257,41 +344,42 @@ DATABASE
 --------
 MongoDB - MongoDB is an open-source document database and leading NoSQL database. RDBMS->Mongo, Table->Collection, Row->Document, column->Field
 h2db - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+@Document(collection = "TVChannel") at class
+spring.data.mongodb.host=localhost
+spring.data.mongodb.port=27017
+spring.data.mongodb.database=TVChannelDB
+@Document(collection = "Employee")
+public class Employee {}
+public interface Employee extends MongoRepository<Employee, Integer>{
 
-AZURE - platform as a service (PaaS)
+AZURE - Platform as a Service (PaaS)
 -----
 
 PCF - Paas
 ---
 
+TOOLS
+-----
+SonarQube
+JMeter
+Postman/SOAP UI
 
 INTERVIEW QUESTIONS
 -------------------
-1. what makes sting immutable
-2. cloud config server
-3. how to configure monitor, micro services (actuator) change url
-4. how hashmap works internally
-5. how set works internally
-6. parllel vs normal stream
-7. optional
-8. hashcode equals contract
+1. Why String is immutable
+2. How hashmap works internally
+3. How set works internally
+4. Parllel vs normal stream
+5. map vs flatmap
+6. optional
+7. hashcode equals contract
 8. wait an notify
-8. functional interface
-9. PCF 
+9. functional interface
 10. Java 8 memory management update
-
-1. log vulnerability
-2. spring boot scheduler
-3. spring boot batch
-4. JMS
-5. MongoDB
-6. Kafka
-
-1. Why wait and notify is declared in Object class instead of Thread? 
-2. Why are multiple inheritances not supported in Java but in java 8? 
-4. Why is String immutable in Java? 
-5. Why char array is preferred to store passwords than a String in Java? 
-6. What happens if your Serializable class contains a member which is not serializable? How to fix
+11. Truststore vs Keystore
+12. Maven install vs build vs package
+13. Why wait and notify is declared in Object class instead of Thread? 
+14. Why are multiple inheritances not supported in Java but in java 8? 
 
 Stub service
 Karate
@@ -303,3 +391,9 @@ Azure cloud
  create resources group
  create app service
  select deployment server
+Azure DevOps
+Cloud formation
+
+java design pattern, builder, singleton, syn concur map diff, sync
+java 8 - feature, filter, map, foreach, pstream, optional
+sb security, exception.
