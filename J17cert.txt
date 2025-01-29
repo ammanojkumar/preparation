@@ -1,0 +1,1444 @@
+OCP JAVA 17 preparation
+=======================
+RTE: RuntimeException / CE: Compilation Error / GTE: Greater Than or Equal to / NAS: No Access Specifier / CANT-AO: Cannot be Any Other
+
+JAVA CORE
+=========
+1. VarArgs always should be ONE for each method as LAST parameter. Otherwise leads CE
+2. VarArgs can be declared in 3 ways print(int... val), (int...val), (int ...val). For array VarArgs printArr(int[]... val)
+	In called method VarArgs considered as Array type. In calling either can pass null OR element(s) OR Array
+	print(); print(null); print(1); print(1,2); print(new int[]{1,2,3}); //All OK. All considered in array form in called method
+	print(int... a){} print(int[] a){} //CE. Its not method overloading
+3. boolean result=(boolean_a ^ boolean_b); //result TRUE only when a and b inverse case like true-false OR false-true
+4. Console con=System.console(); char[] ch=con.readPassword("%s", "pwd: "); //It could return only char array. con.readLine(); con.reader().read();
+5. Scanner scanner=new Scanner(new File("c:/a.txt")); String n=scanner.next(); int age=scanner.hasNext/next(Int/Long/Float/Double/Boolean());
+
+6. 	METHOD				PARAM					RETURN		RESULT**
+	--------------------------------------------------------------
+	Math.ceil(1.001)	double 					double 		2.0	- Gives nearest BIG number	/ Math.ceil(-1.9) gives -1.0
+	Math.floor(1.9)		double					double		1.0 - Gives nearest SMALL number / Math.floor(-1.9) gives -2.0 
+	Math.round(1.5)		float/double			int/long	2   - from .5 next value taken (round(-1.6)=>-2. for -ve from .6 next value taken)
+	Math.pow(2,3)		double,double			double		8.0 - 2*2*2
+	Math.abs(-1.1)		int/long/float/double	same type 	1.1 - always gives same POSITIVE type
+	Math.max(1,3)		int/long/float/double	same type	3   - Max value
+
+	double random=Math.random(); //Gives double value between 0.0 to 1.0,, new Random().nextInt/Long/Float/Double/Boolean(); //Gives primitive**
+7. Variable/Method/Package names can be only starts with letters / _UNDERSCORE / $CURRENCY. Can contain numbers
+	String __, $$, _$, $; //OK => But String _; //CE NOK with single "_"; double pi=3._17; //CE ._ cant be together. pi=3.1_7; //OK
+8. Primitives cases: byte -128 to 127, short 32767, int, long, float, double
+	Typecasting => a. Widening (Auto casting) b. Narrowing
+	ASSIGN			POSSIBLE OTHER ASSIGNMENTS (Widening)	COMMENTS				TYPECAST NEEDED FOR (Narrowing)
+	---------------------------------------------------------------------------------------------------------------
+	byte a=1;		short/int/long/float/double b=a; 		ALL OK
+	short a=128;	int/long/float/double b=a; 				GTE short are OK		byte b=(byte) a; //b is -128. Takes next val of 127
+	int a=1;		long/float/double b=a; 					GTE int are OK			byte/short
+	long a=1;		float/double b=a; 						GTE long are OK			byte/short/int
+	float a=1;		double b=a; 							GTE float are OK		byte/short/int/long
+	double a=1;												Only double OK			byte/short/int/long/float
+	byte<short<int<long<float<double. We can assign smaller value to big primitive
+
+	Primitives-Wrapper cases:
+	a. Wrapper type can be cast to same/bigger primitive. Casting smaller gives CE. (Opposite to primitive case as casting needs only for smaller)
+		double a=Double.valueOf(1); //Same Wrapper to primitive cast OK
+		long/float/double a=(long/float/double) Integer.valueOf(1); //Bigger Wrapper to primitive OK with/without cast as primitive cases
+		long a=(long) Double.valueOf(1); // NOK. Smaller Wrapper to primitive cast CE. Only OK for primitive cases
+		But long a=(long)(double) Double.valueOf(1); //OK for above case
+		Double d=null; if (d>3) {} //NO-CE, But RTE NullPointerException. Can compare any types =>if (intA>doubleB || byteC<flatD) //OK**. But == CE
+		int i=Integer.parseInt("1"); Integer i=Integer.valueOf("1");**
+		Byte.valueOf((byte)4); //Param must byte/less. Float.value((float)1.1); //Same for all. Default consideration: Number=>int, Decimal=>double**
+	b. int c=(short) a+(int) b; //Same/Max primitive can be assigned. So int/float/long/double also be assigned. Others need typecast
+		short c=(short) b+(short) b; //CE, if operator like+operator added, by default convert to int. (short)(a+b) needed with combined result
+		int a=(int) 1.9f; =>result 1 //Convert like a floor,, int b=3/2; =>OK result 1
+		call((byte)1+2); It cannot convert to byte & call call(byte i) method. Considered as byte+int=int. It should be call((byte)(1+2));
+	c. float c=(int) a+(float) b; short d=(short) ((int) a+(float) b);
+	d. For primitive => float x=1;//OK float x=1.1f //f/F must be added. Default decimal consider as double. Else CE
+	e. for Wrapper => Float x=1f, y=1.1f; //For this both 'f/F' needed. Add 'f/F' OR cast to (float) is needed for WRAPPER Float. Else CE
+		Long z=1L; //1 number always considered as int. So add l/L OR cast to (long) is needed for WRAPPER Long
+		Double d=1d; //1 number always considered as int. So add d/D OR cast to (double) is needed for WRAPPER Double only with non-decimal
+	f. Short s=1; //All Wrapper classes has methods for other primitive conversions =>s.byteValue(); s.intValue(); s.doubleValue();
+	g. int a='a'; //OK gives result ASCII value. '1'=49, 'A'=65, 'a'=97 
+	h. Uninitiated static/instance variable default value is => boolean as false, int as 0, Integer as null. For local var CE
+	i. int a=0xE; //14 (Can use x OR X) (A/a to f/F). 0x Hexadecimal,, long a = 0b10; //2 (b/B only 0,1s) for Binary. Default convert to int+**
+	j. int a=1; a=a--; System.out.println(a); //Prints 1 only since it has assign in inline
+	k. double d=1; sOut(d); //1.0,, Double d=1.0; //OK. CANNOT give d=1; //1d OK
+	i. System.out.println((char) a1+(char) b1); //Prints int values. + converts to int
+	j. char ch1=1; //OK auto cast,, int a=1; char ch2=a; //CE Casting needed
+8. Access specifier
+					CLASS	PACKAGE		Same-Package	Diff-Package	Rest
+										subclass		subclass 
+	public			Y		Y			Y				Y				Y
+	protected		Y		Y			Y				Y				-
+	no-modifier		Y		Y			Y				-				-
+	private			Y		-			-				-				-
+
+9. Object coffee=(Integer) null; // Its possible. NO-CE/NO-RTE
+	if (coffee instanceof Integer a) { a++; //OK } else { // a++; CE } //coffee instanceof integer is true. So a can be used in 'if'. In 'else' CE
+	if (!(coffee instanceof Integer a)) {//a++; CE} else {a++; //OK} //Java 14 "Pattern matching". Can declare variable with insteadof check
+	if (null instanceof Object) // NO-CE. It will rerun false
+	if (car instanceof AnyInterface) //OK
+	if (car instanceof PetrolCar) //OK for only related class with Parent-Child relation
+	if (car instanceof ArrayList) //NOK CE. Checking with any unrelated class leads CE Inconvertible types
+	if (obj instanceof Integer i && i>10) {} //OK. Checking insteadof with assignment & compare. But if(obj instanceof Integer i || i>10) {} //CE
+10. var (automatic variable): Used as LOCAL variable/ Lambda (var a)->a/ try-resources. NOT for method param or class variable or instance variable**
+	var list=new ArrayList(); //var list can be only ArrayList. Not List
+	var url=""; var var="hi"; //OK. var is not reserved keyword in java. var ar=new int[]{1,2};
+	var url="", qry=""; //CE. CANNOT be compound declaration,, var data=null; //Cannot set null,, var a[]; //Cannot used for array**
+11. Operator Precedence(#68): (i++, ++i), unary(-,!,~,+), (cast), (*,/,%), (==,!=), (&,^,|), (&&,||), ternary, (assignment =,+=), (->)**
+12. super(..) & this(..) cannot come 2 times in a constructor. super() calls parent constructor. this() calls current class constructor
+	int a=this.variable; this.method(); //.this is used to call child variable/method. If child does not have it then, it calls parent var/method
+	int b=super.parentVariable; super.parentMethod(); //.super is keyword only used for access parent class variable/method
+	this. & super. can be used only in constructor, instance (block & method). Not possible in static (block & method)
+13. Dog dog=(Dog) null; System.out.println(dog); //result null. NO-CE/NO-RTE
+14.	a. Ternary operator/expression: int result=isComplete?1:0;
+	b. Complement operator ~: int a=10; ~a means multiply by (-1) then result-1. => (a*(-1))-1 => -11,, 	int a=-10; ~a is 9
+	c. Complement operator !: Applied only for boolean value
+15. Anonymous class can be created for Interface, Abstract class and Normal class as well
+16. After continue OR break, statement CANNOT be added. Mostly should be inside if condition
+17. if(obj!=null) {int val=3;} int val=1; //OK. Same variable comes after {} block,, int val=1; if(obj!=null) {int val=3;} //Before block NOK-CE
+18. class Printer {static void print();} Printer pri=null; pri.print(); //OK even its null it execute**
+19. Immutable class =>class must be final. variables in the class must be private final. No setters. Constructor can initialize all the fields
+20. class Out { class In {} } //In.class & Out$In.class will be created after compilation. Even inner class is static
+21. Accessor means getter method, Mutator means setter method
+22. int String=1, List=2, Exception=3; //OK,, But Integer void=1, static=2, int=3; //All CE
+
+PRIMITIVE & WRAPPER CLASSES DATA TYPES
+--------------------------------------
+1. Autoboxing Unboxing
+	a. Autoboxing=Convert primitive to Wrapper => {int a=1; Integer b=a;} OR {Integer b=1;},, int a=Integer.valueOf(null); //NumberFormatException
+	b. Unboxing=Convert Wrapper to primitive => {Integer a=new Integer(1); int b=a;}
+	c. long a=1; //OK with AutoBox,, Long a=1; //NOK,, Long a=1L; L/l to be added
+	d. byte a=128; //gives CE. because Byte.MAX_VALUE is 127
+	e. If int i=128; converted to->byte b=(byte) i; then result is -128
+2. primitive cannot check instanceof. Wrapper can do
+3. Declare float value with decimal, must add "f", else it cast to double
+	Eg. float val=1.1f; float val=1; //f needed for only decimal
+	Float & Long wrapper class variable always wants "f/F/l/L" extension. Float val=1f;
+4. Passing primitive/Wrapper/same with Object instance from methodA to methodB in param & update it in methodB, it will NOT reflect in methodA**
+    But other class instances (like Employee em, ArrayList al, int ar[] & so on) will update in called method as well
+	But among (em=new Employee(); OR em=null; OR ar=new int[1];) is created then it will not update in called method
+5. Method overloading calling priority sequence, (For all VarArgs is the last option (byte... val))**
+	a. For primitive byte	-> (byte, short, int, long, float, double), (Byte, Number). NO others
+	b. For Wrapper Byte		-> (Byte, Number), (byte, short, int, long, float, double). NO others
+	c. For primitive float	-> (float, double), (Float, Number). NO others
+	b. For Wrapper Float	-> (Float, Number), (float, double). NO others
+	d. For other primitive and Wrapper classes calls happens in the same way
+6. long a=13, b=111;	long c=a^~b; //c=-99 ok			long c2= a | b; //ok
+	Integer a[]={1,2};	int[] clone=a.clone(); //sOut(Arrays.asList(a)); =>[[I@65ab7765],, If Integer a[] then =>[1,2,3] 
+
+STRING, REGEX
+-------------
+1. String s1="a"; String s2="a"; then s1==s2 =>true, s1.toString()==s2.toString() =>true
+2. If any-one/both new String("a"); then s1==s2 =>false. But s1.equals(s2) =>true. If new String("a") assigned to other var s3 then s1==s3 true
+	If indent(n) used any String both (== AND .equals) =>false. Even for indent(0). Its adds \n. But with strip() =>.equals will be true
+	String a="1", b="1", c=""; (a==b+"") =>true,, (a==b+c) =>false
+3. var sb=new StringBuffer("SB"); var s1=sb.toString(); var s2=sb.toString(); then s1==s2 =>false,, s1.equals(s2) =>true
+4. If both variable used intern, then s1.intern()==s2.intern() =>true
+5. split method
+	str.split("\\d"); =>split by integer
+	"\\." => split by DOT
+	"\\.+" => it consider continues DOTS as single DOT and split
+	METHOD				String						StringBuffer (Always first index inclusive)
+	-------------------------------------------------------------------------------------------
+	.insert(1,"a");		NA							insert "a" at index 1. Param2 Supports boolean,int,long,float,double
+	.delete(0,3)		NA							index 0,1,2 deleted (index 3 exclusive). If 2nd param any value N, no Exception
+	.reverse()			NA							reverse the String
+	.replace(..)		str.replace(str,str);		replace(0,3,"A"); //index 0,1,2 replaced by A (index 3 exclusive)
+													replace(1,1,"A"); //Added A at Index 1. No removal here
+	.substring(1,4);	For both index 1,2,3 taken. index 4 exclusive
+	both params are index above. if p1<p2 StringIndexOutOfBoundsException
+6. sOut("aa\\nbb".translateEscapes()); //Remove additional escapes (\), so it print 2 lines. Without translateEscapes result =>aa\nbb**
+7. int/char ch=Character.valueOf('a'); int i=Integer.valueOf('a');,, Boolean.valueOf("abc"); //OK false,, Integer.valueOf("a"); //RTE
+8. System.out.println("123".repeat(2)); //123123
+9. Starts with """ & 1st line should be next line. If same line has value, its CE. '\s' Space; '\' del new line, comes only at end; '\\' for \;
+	White spaces => space, \t, \n
+	String val="""
+			Line1\
+			Line2\nLine3\\
+			\tLine3""";
+	System.out.println("<"+val+">");
+	<Line1Line2
+	Line3\
+		Line3>
+	 * indent for adding space in front. strip removes spaces of front & back (All these applicable for String s="hi"; as well)
+	 * val.stripIndent(); //Normalize front indentation for each line, if all lines have same spaces
+	 * val.indent(0/+ve/-ve); //+ve means add n space in front, -ve means remove n space front. And add new line at end if no empty last line """
+	 * val.strip(); //Removes leading and trailing white spaces
+	 * val.stripLeading(); val.stripTrailing() //Removes white spaces front (leading) & last (trailing)
+10. String.format("%s, %d, %f, %n, name, id, price); //abc, 1, 2.000000, new line,, "Hi %s. %s".formatted("mr", "Man"); //Hi mr. Man
+
+GC
+--
+1. GC eligible for all new Object() with either (set var to null without other reference to it/assign new Object on same var)
+2. If Employee object passed to other method and again assign new Employee() in calling method then it will not eligible for garbage
+3. String[] s=new String[1]; int i=new int[1]; s=null; i=null; // Both eligible for GC
+
+CONSTRUCTOR
+-----------
+1. No-args constructor created implicitly. If param constructor created, no-args constructor will destroy and need to create it explicitly
+2. In Child class, all constructors (no-args/param) always calls the parent class no-args constructor by super() implicitly at first line
+    So parent constructor execute first then child constructor executes
+    Parent(int a) & Parent(Integer a) considered as different cons/methods. NO-CE/NO-RTE
+3. If Parent class only has param constructor then, it will give CE. To avoid it,
+	a. Create empty constructor in Parent OR
+	b. super(param) OR this(empty/param) to be added in all Child constructor
+4. CANONICAL CONSTRUCTOR (a) with all the declared fields (old way). (b) COMPACT CONSTRUCTOR is parameterless one
+	a. public Student(int id, Sting name) {this.id=id; this.name=name;}
+	b. public Student {name=name.toUpperCase;} //All args constructor
+5. final instance variable can assigned only in =>Inline/Constructor/instance block. final static var=>Inline/static block
+	final int a; Cons() {this.a=1;} OR {a=1;} OR static {a=1;} //If it is static
+6. If 2 constructor calls cyclic its CE. If methods can do the same NO-CE. But RTE StackOverflowError
+7. Parent to Child =>(static block, static variable), (instance block, instance variable) only with new call, constructor
+
+INNER CLASS - InnerClass, StaticInnerClass, LocalClass
+-----------
+class Outer {
+    int insA;
+    void instanceMethods() {
+        Inner innerObj = new Inner();
+        StaticInner staticInnerObj = new StaticInner();
+        int val=1; //By default, its effectively final since its used in local class. If any change added, CE in LocalClass assignment of this val
+        class LocalClass {
+            int locA=val; //val must be initialized, Else CE. val++ is not applicable anywhere (CE here) since effectively final
+            //int locB=val2; //CE. val2 cannot be accessible, since this variable declared after this method
+            void localMethod() {
+                Inner innerObj=new Inner(); //innerObj=new Outer().new Inner(); innerObj=new Outer.Inner();
+                StaticInner staticInnerObj=new StaticInner(); //Also only => new Outer.StaticInner();
+            }
+        }
+        int val2=2;
+        LocalClass localClass = new LocalClass(); //This can be created only after the LocalClass. Before that leads CE
+    }
+    static void staticMethod() {
+        Outer.Inner in=new Outer().new Inner(); 								in.innerMethod();
+        Outer.StaticInner sin=new StaticInner(); sin=new Outer.StaticInner(); 	sin.staticInnerMethod();
+    }
+    class Inner {
+        int insC;
+        void innerMethod() {
+            Outer.this.instanceMethods();
+            int locC = Outer.this.insA;
+            Outer.staticMethod();
+        }
+    }
+    static class StaticInner {
+        int insD;
+        void staticInnerMethod() {
+            new Outer().instanceMethods();
+            int locD = new Outer().insA;
+            Outer.staticMethod();
+        }
+    }
+}
+	1. Static Inner class instance creation (Only One way)
+		a. From (instance & static) method					: Outer.StaticInner obj=new Outer.StaticInner();
+	2. Inner class instance creation (Two ways)
+		a. From instance/static method in same/other class	: Outer.Inner obj=new Outer().new Inner();
+		b. From instance method in same class				: Outer.Inner obj=new Outer.Inner(); //Additionally provided option like 1.a
+	3. Instance-inner-class cannot extend by static-inner-class. class A{} static class B extends A{} //CE**,, vice-versa OK
+		class Out { static class P {}	static class C extends P {} } //OK=>(Both P&C 1. static/2. non-static), (3. P only static)
+		NOK-CE=>(4. C only static). All 1,2,3 cases overridden works properly
+
+EXCEPTION & ERROR
+-----------------
+Exception constructor: public Exception(), Exception(String message), Exception(Throwable cause), Exception(String message, Throwable cause)+1
+Hierarchy
+Serializable-I
+	Throwable-C
+		A. Exception-C
+			1. RuntimeException (UNCHECKED exceptions)
+				1. ArithmeticException 	(int a=1/0;)							2. ClassCastException (Emp e=(Emp) stu)
+				3. IllegalArgumentException (Thread.sleep(-1))					4. IndexOutOfBoundsException
+				5. NullPointerException											6. UnsupportedOperationException (List.of(1, 2, 3).add(4);)
+				7. NumberFormatException (Integer.valueOf("two");) extends #3	8. NoSuchElementException (emptySet.iterator().next())
+			2. IOException (file/directory/path related)
+				FileNotFoundException, FileLoadException, FileSystemException,
+				DirectoryNotFoundException, EndOfStreamException, PathTooLongException
+			3. InterruptedException
+			4. RemoteException
+			5. SQLException
+			6. ParseException
+			7. ClassNotFoundException (Class.forName("com.Emp"),, objectInputStream.readObject())
+		B. Error
+			1. VirtualMachineError
+				StackOverflowError, OutOfMemoryError
+			2. AssertionError
+			3. LinkageError
+				VerifyError
+1. RTE is not required to catch, since it is unchecked exception
+2. If you throw any Error like AssertionError, it is NOT needed to handle in try-catch like unchecked exception
+3. If IOException is impossible in code, CAN be thrown in method() throws IOException. But CANNOT use it in try {} catch(IOException e){}. Its CE
+4. multi-catch block exception can contains more than one types. Cannot contains two exception types which one inherit from other
+	try {..} catch (NumberFormatException | ArithmeticException  e3) {} //Possible
+	try {..} catch (IOException | Exception  e3) {} //Not possible this or vice-versa. Because of Parent-Child relation, its redundant
+5. AutoCloseable used to close the resources. Here Elephant class must implement Closeable interface with close() method to use Try with resources
+	class Elephant implements Closeable {
+		@Override public void close() throws IOException {..}
+	}
+	try (Elephant elephant=new Elephant()) {
+	} catch (Exception e) {} //this is mandatory if close method throws IOException
+
+	try (Scanner sc=new Scanner(new File(".."))) { //Scanner already implements Closeable
+		sc.nextLine();
+	} catch (Exception e) { //This catch is NOT mandatory. Scanner close method NOT throws Exception
+		//sc is not reachable here and finally
+	} finally {}
+
+	a. interface Closeable extends AutoCloseable
+	b. Closeable.close() method throws IOException only. AutoCloseable.close() throws Exception. So, prefer AutoCloseable for custom classes**
+	c. If there are more resources inside (..) then It is completed/if any exception, resources will be closed from right to left
+		Scanner sc1=new Scanner();
+		try (sc1; Scanner sc2=new Scanner(); Scanner sc3=new Scanner()) {
+			throw new RuntimeException();
+		} //Here resources closed in the order of reverse as sc3, sc2, sc1
+	d. If try block throws exception, close method execute. If close also throws exception, this one suppressed. Try one only taken
+6. If inside block of both (catch and finally) throws exception, then 'finally' throwing exception raised in called method
+7. If try followed by series of catch then, if any exception comes only any one of the catch executes even it throw Exception again
+8. Error is like unchecked exception. Error and Throwable (has Error) both not recommended to catch in application
+9. Variable is created outside and used in try-with-resources should be effectively final. If it assigned again outside gives CE
+10. try(var obj=new Garden(2)){} //OK,, try(new Garden(2)){} //CE variable should be initialized since its also effectively final
+11. try-with-resources: both try block & close() throws exception, try block only taken. close() execute first, but throwing Exception suppressed
+12. try { throw new Exception(new NullPointerException("val is null")); } catch (Exception e) {
+		System.out.println(e); 							//java.lang.Exception: java.lang.NullPointerException: val is null
+		System.out.println(e.getCause()); 				//java.lang.NullPointerException: val is null
+		System.out.println(e.getCause().getMessage());	//val is null
+
+INHERITANCE & MODIFIERS
+-----------------------
+Parent to Child /\ =>Visibility (protected to public). Return type (Number to Integer). Override throws Exception { (Exception to SAME/CHILD/NONE)
+1. Overridden method visibility can be same or expanded visibility (protected to protected/public). Cannot reduced/narrowed as (protected to private)
+2. Overridden method can have throws SameException/None/any ChildException {
+	But child method cannot throws any CHECKED Exception, if parent method does not throws (applicable only checked exception)
+	If Parent class method throws Exception, then overridden class (applicable only for checked Exception)
+		a. Not required to throws Exception OR
+		b. Can throws same exception OR
+		c. throws any child-exception of Exception
+		d. But child class method CAN throw any UNCHECKED exception like (IndexOutOfBoundsException), even if parent does not throws
+	Additionally,
+		* In try-catch its inverse \/. If called method throws IOException, calling method can try-catch same or Parent Exception. Not Child, Its CE
+		* catch Exception hierarchy should child to parent =>try {..} catch(IOException e){} catch(Exception e){}
+3. Overridden methods return type can be same/any of Child class. No other. If Parent return Number, Child can return Number/Integer/Short
+4. For calling methods, always child class overridden method would call, even if create object for child and assign it to parent instance
+5. If parent and child instance passed to param for method overloading, then method will call as per the passed instance only
+	Eg. A) void print(Number n){} B) void print(Integer i){}. A calls only when passing Number. B calls for only Integer
+6. For variable, Parent class's instance variable would be taken, if create object for child and assign for parent. Against method call
+7. If Parent has [static void print()] then Child should not have instance method [void print()] & vice-versa. Its CE**
+8. When Parent has ONLY private instance method [private print()] then Child can have static/instance method [static print()] with same signature
+	In this case, if Parent has non-private print() method & child static print() method then CE
+9. class Parent {protected void parMethod() {}}  class Child extends Parent {void chiMethod() {parMethod();}}
+	In any Child method, Parent method can be called like parMethod(); But arbitrary instance CANNOT call like new Parent().parMethod(); //C3.209
+10. In overriding, any one ParentC OR childC method is static then CE. But ParentC method can be private static OK. Inverse case is NOK CE** 
+11. ParentC extends ChildC: Both classes have same signature methods => static void printStatic(); void display(); => ParentC p=new ChildC();
+	Method Hiding	: p.printStatic(); calls only ParentC class method. Here ChildC method printStatic() hidden
+	Overriding		: p.display() calls ChildC method only, its called overriding. But for variable p.val; its call hit only Parent**
+	Polymorphism	: class A {void a(){sOut(1);} void print(){a();}} class B extends A {void a(){sOut(2);}} //A a=new B(); a.print();=>2
+12. Inf2 extends Inf1. Both can have abstract method with same signature. If Inf2 is abstract class then not possible to have same abstract method
+	A class implements interface, implemented methods should be public. When extends abstract class based on abstract-class method**
+	By default interface is abstract =>abstract interface Animal {}
+
+INTERFACE & ABSTRACT CLASS
+--------------------------
+	@FunctionalInterface
+	interface Inf1 {
+		int value=1;					//By default, "public static final". It should be assigned inline only
+		List list=new ArrayList<>();	//Possible as like above
+		void printAbstract(); 			//By default "public abstract"
+		public String toString();		//Can have object class methods as abstract
+		default void printDefault() { 	//By default, "public". Returning List
+			printAbstract();
+			printPrivate();
+			printStatic();
+		}
+		private void printPrivate() {
+			printAbstract();
+			printDefault();
+			printStatic();
+		}
+		static void printStatic() {}	//By default, "public". Also, can be private
+	}
+	interface Inf2 {
+		default void printDefault() {}	// Returning Collection
+	}
+	class Printer implements Inf1, Inf2 {
+		public void printAbstract() {}
+		public void printDefault() {	//Must implement, since two interfaces has same default methods
+			Inf1.super.printDefault();	//Optional
+		}
+	}
+1. interface
+TYPE				DEFAULT (IMPLICITLY with NAS)	DESC
+--------------------------------------------------------
+variable			public static final. CANT-AO	So always must initialize it. Otherwise CE
+abstract method		public abstract. CANT-AO		It can either "NAS/public", but always considered public. So overridden method must have public
+default method		public. CANT-AO					Same as abstract method. Only differance, It must be concrete method. It can be overridden
+private method		NA. Should be only private		Same as default method. Only differance, It must be private, So it cannot be overridden
+static method		public. Also can be private		Behaves as normal class like cannot be overridden & NOT protected. private/NAS/public
+													static method cannot call other methods without instance
+	a. All methods and variables should be public in interface except private method. static method can be anything expect protected
+	b. Default method	: If Printer implements 2 interfaces which has SAME default methods printDefault() then this method MUST be implemented
+		Can be called like I1.super.method(); I2.super.method();
+		default method can call abstract/private/static method in interface
+	c. private method	: private method can call abstract/default/static method in interface
+	d. static method	: static method cannot call other methods (Same as normal class)
+	e. Interface method cannot be final. Overridden interface method can be final in a class
+	f. Create & declare any Object in Interface like =>List list=new ArrayList(); //By default its consider "final static"
+		It can be accessible in any interface methods even static method
+	g. interface A extends B. Both has same signature method then NO CE
+	h. In interface NO method can be final
+2. Functional interface
+	a. It must have only one abstract method. It can have any number of (static, default, private) methods
+	b. It can have additional abstract methods like toString, equals.. methods, these are not counted
+3. abstract class
+	a. Variable			: Like a normal class. It can be public/private/protected/NAS/final
+	b. Abstract method	: It should not have body. It cannot be only private. It should be declared with "abstract" keyword
+		Cannot create instance for abstract class. Can create only object by anonymous class like interface
+		Any class extends this abstract class must implements the abstract methods. Else CE
+	c. Normal method	: It acts like normal class method. Can be instance/static/final
+	d. abstract class cannot be final since it should be extended by other class
+	e. If an abstract class implements interface then does not require to implement interface methods. Also can be implemented
+	f. abstract class can have constructor, but cannot be initialized. It will call through child constructor when object created for child
+						INTERFACE										ABSTRACT CLASS
+a. Variable			Only "public static final" also as default		Can be any (public/protected/no-access-specifier/private)+final
+b. Abstract method	Only "public abstract" also as default			CANNOT be only private. abstract keyword required
+c. Default method	Only "public" also as default					Not applicable
+c. Static method	"public" by default. Also can be private		All applicable
+
+ENUM & SWITCH
+-------------
+1. enum Car { BENZ, AUDI} //Basic
+2. enum Car {
+		BENZ, AUDI; //Enum data should come first before constructor/method/getter/setter. Else CE
+		@Override public String toString() {return "car";} //Override toString possible
+	}
+3. enum Car {
+		BENZ ("The Best or Nothing"), AUDI("Progress through Technology"); //With param
+		public static final Car DEFAULT=BENZ;		//Any number of static & instance variables & methods allowed
+		private String slogan; 						//Reference for slogan must declare
+		Car(String slogan) {this.slogan=slogan;} 	//Constructor must be PRIVATE by default. No other. Declared with 1 param**
+		public String getSlogan() {return slogan;}	//Optional getter
+		public void setSlogan(String slogan) {this.slogan=slogan;}	//optional setter. Once updated, everytime it will reflect
+	}
+	It can be accessed like Car benz=Car.BENZ; String slo=Car.BENZ.slogan; String slo2=Car.BENZ.getSlogan();
+4. interface Printer {void print();}
+	public enum FoodStatus implements Printer { //enum can implement interface & must implements methods Commonly/Individually/BOTH
+		ORDERED(2) {
+			@Override public boolean isOrdered() {return true;} 		//Override optional
+			@Override public String getDesc() {							//Override mandatory for abstract method
+				return "Your Food ordered! "+sayThanks();
+			}
+			public String sayThanks() { return "Thank you"; } 			//Additional method. But cannot be called from outside
+		},
+		READY(1) {
+			@Override public boolean isReady() { return true; }
+			@Override public String getDesc() { return "Food is ready"; }
+		},
+		DELIVERED(0) { 
+			@Override public boolean isDelivered() { return true; }
+			@Override public String getDesc() { return "Its delivered"; }
+		};																//Must ends with ";"
+		public void print() {}											//Must override Printer method
+		public boolean isOrdered() { return false; }
+		public boolean isReady() { return false; }
+		public boolean isDelivered() { return false; }
+		public abstract String getDesc();
+
+		private int deliverTime;										//Mandatory reference for enum param deliverTime
+		FoodStatus(int deliverTime) { this.deliverTime=deliverTime; }	//Mandatory constructor with param
+		public int getDeliverTime() { return deliverTime; }				//Optional getter
+		public void setDeliverTime(int deliverTime) { this.deliverTime=deliverTime; }	//Optional setter
+	}
+	a. EnumMap<FoodStatus, String> enumMap=new EnumMap(FoodStatus.class); //EnumMap used for specific enum. Must pass param as EnumMap.class
+	b. Enum data should come first followed by ; then constructor/method/getter/setter. Else CE
+	c. Constructor must be PRIVATE by default. No other**
+	d. Car car=Car.valueOf("BENZ"); //valueOf is implicit method convert string (Case sensitive) to enum. Else RTE IllegalArgumentException
+	e. int index=Car.BENZ.ordinal(); //ordinal is like index of enum values starts from ZERO
+	f. enum param value once changed by setter, it will always give changed result after that for all calls**
+	g. Car[] cars=Car.values(); //values() return Array
+
+5. Java 13 introduced the yield keyword for the switch expressions. Yield used to avoid break. It must return value with {}
+	enum Number {ONE, TWO, THREE, FOUR}
+	Number number=Number.ONE;
+	String message; 	//Switch statement with break
+	switch (number) {
+		case ONE:		//If case value is used from another variable then, that should be final
+			message="Got 1";
+			break;
+		case TWO, THREE: THREE: Four: Anything: //Can add any label inside case, that is not cosidered**
+			message="Got 2 or 3";
+			break;
+		default:
+			message="Got >3";
+	}
+	String message=switch (number) { 		//Switch expression(->). Assign to var mandatory, If it has yield/return. Else for statement not required
+		case ONE		-> {yield "Got 1";} //Must have ; with yield. Should not have semicolon; at end**
+		case TWO, THREE	-> "Got 2 or 3";	//Same functionality as ONE without yield. Can use break only expression with statement {}, But redundant
+		default			-> "Got >3";		//Default required for all possible values in expression. Else CE**
+	}; //Semi colon mandatory for switch with assign variable at end**
+	int val=1; final int FOUR=4; int five = 5;
+	String res = switch (val) {
+		default -> null;
+		// case five -> "five";	//CE. five must be final
+		case 1 + 1 -> "Two";	//OK. Since it cannot change anywhere than this
+		case FOUR -> "Four";	//OK Since FOUR final
+	};
+	a. "case ONE:" with break => "case ONE ->" break avoided
+	b. Switch enum with yield must end with ; If more than 1 line with return, yield should be added with {} for returning
+	c. If enum used in switch, only enum value must be mentioned "case ONE:" //OK "case Number.One:"// Its CE**
+	d. default can come anywhere NO-CE. Execute only when no match as usual in both above scenarios
+	e. In Switch (Object, boolean, long, float & double) (Also wrapper) values are NOT permitted. Its CE**
+	f. In switch expression return types are (int OR double) then var cosidered as double since Biggest type
+	g. If traditional switch does not have break then it will execute all rest case statements ONLY after matching condition
+	h. Only traditional switch can directly return value for method return type
+
+ARRAY
+-----
+1. static int[] a; static {a[0]=2;} this gives->ExceptionInInitializerError. This assignment in methods give NullPointerException
+2. Array declarations,
+	a. Valid int a[][]; int[][] b; int[] c[]; var d=new int[5][5]; int[] e[],f; /*e 2D, f 1D*/ int[]g[]=new int[5][]; //OK. e[0] is null
+		primitive/Wrapper int a[]={1};,, String s={"1"};
+	b. INVALID. []int a; var[] b; //var[] is not allowed in array,, int[]e[]=new int[][]; //NOK**
+	c. int a[]={1,2}; //OK,, a=new int[]{1,2,3}; //Here new int required,, var b=new int[]{1,2,3}; //var always requires new int
+3. Arrays.binarySearch: Only after SORTING, if element is exists, it will return index. Else return (Nearest smaller index+2)*(-1)
+	Eg.	int arr[]={4, 6, 7}; Arrays.sort(arr); =>void
+		a. Arrays.binarySearch(arr,1) //return -1. Val not present. Smaller than 1st element
+		b. Arrays.binarySearch(arr,9) //return -4. Val not present. Bigger than index 2 => (2+2)*(-1)
+		c. Arrays.binarySearch(arr,5) //return -2. Val not present. Bigger than index 0 => (0+2)*(-1)
+		d. Arrays.binarySearch(arr,6) //return  1. If value found, index value of sorted array
+		e. (1 < A < a) (49 < 65 < 97) means 'A' (ASCII 65) is smaller than 'a' (97). And '1' (49) is smaller than 'A'
+		f. If the elements not sorted ascending then, result cannot predict
+		g. If array in descending/some other order, can mention it 3rd param comparator. It will work fine
+			int arr[]={3, 2, 1}; int i = Arrays.binarySearch(ar, 3, (a,b)->b-a); =>0. Since we mentioned the order in 3rd param it works fine
+	In Collections, int i=Collections.binarySearch(list, 1); //List must be ascending. If its in descending comparator must passed same as array
+4. Arrays.mismatch(arr1,arr2);	//(index/-1). Returns the mismatch index. If both array same return -1. Its straightforward, No others
+	Files.mismatch(path,path);	//Mismatch index. Files has only mismatch method, NOT having compare
+5. Arrays.compare(arr1,arr2); //Both same length (0/-1/1). Both same =>0. First mismatch left element is bigger, return 1. If right element bigger -1
+	If different length arr1={1,2,3}; arr2={1,2,3,4,5}; =>-2 (number of additional element in right). If compare(arr2,arr1); =>2
+	If different length arr1={1,2,3}; arr2={1,2,6,7,8}; =>-1. Since element differ in same length of both
+	If arr2 empty then return +ve val of arr1.length. If arr1 empty then return -ve val of arr2.length**
+6. int[][] ar=new int[3][2]; => int[][] ar={{0,0},{0,0},{0,0}}; //ar.length is 3. ar[0].length is 2
+	int ar[][]=new int[2][]; //OK NO-CE, NO-RTE. ar[0] is null. But int ar[][]=new int[][]; //CE,, int ar[][]=new int[][1]; //CE**
+7. If no args passed to main method, then this args considered as String args=new String[0];
+8. 2D int/any-array can be stored only in 1D Object array. Else CE. Same way 3D also store in 1D object array
+	 int values1[][]=new int[3][3];	 		Object[] obj1=values; //2D to Object array
+	 int values2[][][]=new int[3][3][3];	Object[] obj2=values; //3D to Object array
+	 int values3[][]=(int[][]) obj2[0]; //Getting back from Object array
+9. Mutable List results,
+	ACTION								Arrays.asList(..) 		List.of(..), List.copyOf(..), stream1.toList()
+	-----------------------------------------------------------------------------------------------------------
+	.add new element 					No						No
+	.set(2,3) on existing element		Yes						No
+	null accepted when initialize		Yes						No
+	Collection.sort(comparator)			Possible				Not possible
+	a. Integer[] arr={1,2,null}; List<Integer> list1=Arrays.asList(arr); //This returns a fixed-size List<Integer>. Values can be sort/update
+		list1.add(1); //NO-CE. But cannot add more elements throws UnsupportedOperationException
+		list1.set(1, null); //OK. Can update existing index
+		If change in array also reflect in list. arr[2]=3; list1.get(2)=>3**
+	b. List<Integer> list2=List.of(1, 2, 3); //Returns immutable List. Values CANNOT sort/update
+		list2 CANNOT (add new element / set existing element / have null). NO-CE. But RTE
+	c. List<Integer> list2=List.copyOf(list1); //Returns immutable List. CopyOf(Collection). Values CANNOT sort/update. Like clone
+	d. Object[] objArr=list1.toArray(); Integer[] iArr=list1.toArray(new Integer[10]); //Passing this param makes Integer array with length 10 null
+	e. Integer[] arr1={1,2}; List<Integer> list2=Arrays.asList(arr1); int[] arr2={1,2}; List<int[]> list3=Arrays.asList(arr2); //Wrapper vs primitive
+	f. Map<String, String> map=Map.of("k1", "v1", "k2", "v2"); //Only even num of param for k,v accepted, else CE. Cannot add null & cannot do put
+
+COLLECTION, GENERIC, WILDCARDS
+------------------------------
+Iterable-I
+	Collection-I
+		1. List-I			=> 1. ArrayList, 2. LinkedList, 3. Vector => Stack
+		2. Queue-I			=> 1. PriorityQueue
+			Deque-I			=> 1. ArrayDeque, 2. LinkedList			=> LinkedList<E> implements List<E>, Deque<E>
+		3. Set-I			=> 1. HashSet, 2. LinkedHashSet
+			SortedSet-I 	=> NavigableSet-I	=> 1. TreeSet
+
+Map-I	=>	HashMap	=>	LinkedHashMap
+	SortedMap-I		=>	NavigableMap-I	=>	TreeMap
+
+1. In generic,
+	a. For generic class declaration unbounded wildcard X<?> and <T super U> are NOT allowed. Only <T extends U> is allowed**
+		class Roller<E extends Wheel> {}
+	b. For creating new object right side <?> not allowed. Can be used for left side declaration. For List<?> Nothing can be added
+		List<? extends Number> numbers=new ArrayList<Integer>();
+	c. For creating generic object, left & right should be same Type OR only right side can be empty
+		List<Number> numbers=new ArrayList<Number>(); List<Number> numbers=new ArrayList<>(); List<?> numbers=new ArrayList<>(); //OK
+		List<? super RuntimeException> list=new ArrayList<Exception>(); //OK
+		List<? extends Exception> list=new ArrayList<RuntimeException>(); //OK
+		List<? extends Number> numbers=new ArrayList<Number>(); List<? super Integer> numbers=new ArrayList<Integer>(); //OK
+			List<Number> numbers=new ArrayList<Integer>(); //NOK-CE. Cant be different
+			List<> numbers=new ArrayList<Integer>(); //NOK-CE. Empty <> never be left side. But right side can be**
+2. If interface Inf<T> has generic Type & implemented class does not know the Type then, the Type must be added in class Cls<T>
+	interface MyInterface<T> { //For interface & abstract-class <T> must be always Type. Even if it has <Long> Its consider as Type, not Long
+		void print(T t); }
+	class MyClass<T> implements MyInterface<T> { //Here <T> should be added in class, otherwise CE
+		void print(T t) {} } //Must be T only
+	class MyClass implements MyInterface<Integer> { //If Integer added in MyInterface then MyClass can be empty
+		public void print(Integer val) {} } //Must be Integer only
+	class MyClass implements MyInterface {
+		public void print(Object obj) {} } //If no Type mentioned, Default Type considered as Object
+3. Example of method with generic type param and return
+	    public <TYPE extends Collection<ELE>, ELE> ELE addHere(TYPE coll, ELE val) {
+			coll.add(val); return val; //Here coll considered as any TYPE extends Collection
+		}
+		//Wildcard 1 (used in param1): TYPE extends Collection<ELE> =>TYPE extends Collection, ELE is generic of that collection
+		//Wildcard 2 (used in param2): ELE =>ELE should be the 2nd param and also return type
+		Calling part,
+			List<> values=new ArrayList<String>();
+			String duck=addHere(values, "duck"); //return type should be String here
+4. Type T extends meaning (Comes only in class/interface level Generic declaration)
+	a. <T extends Collection>	means T can be List or ArrayList (interface or class)
+	b. <T extends ArrayList>	means T can be ArrayList or its subclass (Only class)
+
+Audi, BMW, Benz extends Car extends Vehicle
+1.  private void processExtends(Collection<? extends Car> cars) {
+		//cars.add(new Audi()); //NOK-CE: Nothing can be added
+		Car next=cars.iterator().next(); //return Car
+	}
+	Inside method,
+		a. ADD:		NOTHING. Because it could be only among Audi/BMW/Benz. Cannot predict
+		b. READ:	Car. Because Car is parent
+	Calling method,
+		a. List<Car> ex1=new ArrayList<>(); processExtends(ex1);
+		b. List<Audi> ex2=new ArrayList<>(); processExtends(ex2);
+2.  private void processSuper(Collection<? super Car> cars) {
+		cars.add(new Car()); 		//Same class can be added
+		cars.add(new Audi()); 		//Subclasses can be added. Generic might be any parent of Car. So all subclasses can be added
+		//cars.add(new Vehicle());	//NOK-CE: No super class can be added
+		Object next=cars.iterator().next(); //return Object
+	}
+	Inside method,
+		a. ADD:		Car & any of its sub classes like Audi can be added
+		b. READ:	Object. Because it is the parent for all
+	Calling method,
+		a. List<Car> su1=new ArrayList<>(); processSuper(su1); //same class
+		a. List<Vehicle> su1=new ArrayList<>(); processSuper(su1); //super class
+3. public int compare(Employee e1, Employee e2) {..}
+	a. return e1.name.compareTo(e2.name); //Small to big sequence order
+		Process like IntVal(e1.name)-IntVal(e2.name); Result -VE e1 (LEFT) added first. If +ve e2 (RIGHT) added first
+		a. returns -val, if left is small	=> Eg. "A".compareTo("B");	(like 97-98=-1 So A added first)
+		b. returns +val, if left is big		=> Eg. "B".compareTo("A");	(like 98-97=+1 So B added first)
+		c. returns 0, if both same
+	b. return e2.name.compareTo(e1.name); //Reverse order
+	c. Collections.sort(listOfInteger, (a,b)->a-b); Comparator.comparingInt(a->a)); //For Ascending order
+4. Consider set has even numbers from 600 to 620. subset gives same memory values. Only applicable for TreeSet
+	TreeSet subs=(TreeSet) set.subSet(608, true, 611, true); => 2,4 param indicate inclusive of values (Here not about index)
+	a. Cannot add other values between these in subset like 612. (IllegalArgumentException: key out of range)
+	b. If any values added/removed in set/subs, this will reflect in bot set & subs, if value between the subset range
+5. List has .set(index, value) method (Order by index). Set does not have it, Because NO index in Set, Its Unordered
+6. Adding Student in TreeSet<Student> gives RTE. Not-CE. So implement Comparable<Student> interface
+7. Comparator has int compare(Object o1, Object o2) can be replaced from a to d
+	a. Comparator<Student> comp=new Comparator<Student>() { @Override public int compare(Student stu1, Student stu2) { return stu1.id-stu2.id; }};
+	b. Comparator<Student> com=(stu1, stu2)->stu1.id - stu2.id;
+	c. Comparator<Student> comp=Comparator.comparingInt(stu->stu.id); //(ToIntFunction). Also have comparingLong, comparingDouble
+	d. Comparator<Student> comp=Comparator.comparingInt(Student::id); OR comp=Comparator.comparing(Student::id);
+	e. Comparator.comparing(String::length).thenComparing(..);//(Function). thenComparing default method can be used multiple times**
+	f. List.of("a","f","z").stream().sorted(Comparator.reverseOrder()); //Comparator::reverseOrder cannot be used as method reference**
+8. Action						Queue				Deque d=new LinkedList()/ArrayDeque()	Return	If NO element
+	----------------------------------------------------------------------------------------------------------
+	Add to front				NA					addFirst(e), offerFirst(e), push()				1,2=>boolean. 3=>void
+	Add to back					add(e), offer(e)	addLast(e), offerLast(e)						boolean
+	Read from front				element(), peek()	getFirst(), peekFirst(), peek()					E
+	Read from back				NA					getLast(), peekLast()							E
+	Get & remove from front		remove(), poll()	remove(),removeFirst(),pop(),poll(),pollFirst()	E	poll()=>null. pop()=>NoSuchElementException
+	Get & remove from back		NA					removeLast(),pollLast()							E
+9. Adding null key or value
+	CLASS				ACTION						RESULT
+	HashSet				Adding null value 			Acceptable
+	HashMap				Adding null key & value		Both are acceptable
+	TreeSet				Adding null value 			No-CE. But RTE
+	TreeMap				Adding null key	& value		No-CE. But RTE. Adding null value is acceptable
+	HashTable			Adding null key & value		Both are NOT acceptable. Only RTE. No-CE
+10. List has TWO remove methods
+	a. Remove list with Element.	boolean res=list.remove(Integer.valueOf(1)); If no value/empty list, return false
+	b. Remove list with Index.		Integer val=list.remove(0); If empty list, throw IndexOutOfBoundsException
+11. List is ordered collections (Retrieves values in inserted way). Set is unordered, gives result unordered by iterator & No index search
+12. method =>static <U extends Exception> void printE(U u) {} //Call like TestC1.<NullPointerException>printE(new NullPointerException());//OK
+13. map.merge(key, newVal, BiFn). map{1=10,2=20,3=null}; map.merge(1,2,(oldVal, newVal)->oldVal+newVal); =>{1=12, 2=20, 3=null};
+	merge(3,3,(oldVal, newVal)->oldVal+newVal); =>{1=14,2=20,3=3}
+	replaceAll(BiFun); replaceAll((key, val)->key); => {1=1,2=2,3=3};,, putIfAbsent(key, val); put key-val only if key is not present
+	computeIfPresent(1, (k,v)->k+v); //(key, BiFn) =>{1=11, 2=20, 3=null}. c.computeIfAbsent(4, k->k+1); //(key, Fn) =>{1=10, 2=20, 3=null, 4=5}
+14. Comparator => compare(Object o1, Object o2) {return 1};,, Comparable => public int compareTo(Object o) {return 1};
+15. List list1=Arrays.asList(5,4,3,2,1); Collections.sort(list1, Collections.reverseOrder()); //Not required if already in descending
+	Collections.binarySearch(list1, 5, Collections.reverseOrder()); //Mention at 3rd param which order it is. This give correct index value
+
+THREAD, SYNCHRONIZATION
+-----------------------
+1. A thread can be started only one time. If it started again, it throws RTE IllegalThreadStateException
+2. Single thread can thread.interrupt() many times. But it will be killed at first time interrupt. No use of interrupt again. But No CE-RE
+3. Executors class
+	ScheduledExecutorService sesSingle=Executors.newSingleThreadScheduledExecutor();
+	ScheduledExecutorService sesPool=Executors.newScheduledThreadPool(5);
+	ExecutorService es=Executors.newSingleThreadExecutor();
+	ExecutorService es=Executors.newFixedThreadPool(5);
+	ExecutorService es=Executors.newCachedThreadPool();
+	ScheduledFuture<?> sf=sesSingle.scheduleAtFixedRate(Runnable:()->{}, init-delay:1, period:3, TimeUnit.SECONDS); //Create new Thread each 3 secs
+	ScheduledFuture<?> sf=sesSingle.scheduleWithFixedDelay(Runnable:()->{},..); //Create new Thread after complete 1 thread + 3 secs
+
+	Runnable runnableObj=()->System.out.println(Thread.currentThread().getId()); //Has void run(); method without return
+	Callable<Long> callableObj=()->Thread.currentThread().getId(); //Has T call() throws Exception; method with return
+	es.execute(runnableObj); //Execution allows only Runnable & return void
+	Future<?> future=es.submit(runnableObj); //future.get() will give void. For get() necessary to catch InterruptedException, ExecutionException**
+	Future<Long> future=es.submit(callableObj); //future.get() will give Long
+	List<Future<T> fList=es.invokeAll(Collection<Callable>);,, Integer value=es.invokeAny(Collection<Callable<Integer>>);
+	//Both took same time to execute it since it returns only completes all. invokeAll(..) accepts only Callable Collection**
+		sesSingle.scheduleAtFixedRate(()->System.out.println(1), 1, 1, TimeUnit.SECONDS);
+		sesSingle.awaitTermination(5, TimeUnit.SECONDS); sesSingle.shutdown(); //Prints 1 for 5 times with 1 sec interval and terminates
+
+	a. Methods => Callable<V> {V call() throws Exception;}. Runnable {public abstract void run();}**
+	b. Callable interface return V. Runnable interface has no return
+	c. es.submit(callable/runnable) //Can pass either & return (callable: Future with value / runnable: Future with null)
+	d. es.execute(runnable); //No return
+	e. es.shutdown(); //es should have shutdown. It will not accept new tasks, but already submitted tasks continue to finish
+	f. es.shutdownNow(); //above+try to cancel the submitted running tasks by interrupting the relevant threads
+		ScheduledExecutorService ses=Executors.newScheduledThreadPool(5); //It execute each 5 threads
+        for (int i=0; i<10; i++) {
+            Future<Integer> f=ses.submit(runnableObj/callableObj); //Future<Integer> given, if param is callable
+            Object obj=f.get(); //.get() waits each Thread (Not together 5) to complete. ExecutionException, InterruptedException to be caught
+        }
+		ses.schedule(runnableObj/callableObj, 5, TimeUnit.SECONDS); //callableObj will call after 5 seconds delay
+		ses.awaitTermination(4, TimeUnit.SECONDS); //It will wait for 4 sec togo next line above threads executing
+		ses.shutdown(); //Necessary to end the program
+	g.  ScheduledExecutorService ses=Executors.newSingleThreadScheduledExecutor();
+        ses.scheduleWithFixedDelay(()->System.out.println("Only Runnable"), 0, 1, TimeUnit.SECONDS); //Its executes for each second with one submit
+        ses.submit(() -> System.out.println("submitted"));
+4. AtomicInteger/AtomicLong/AtomicBoolean are thread safe by design. Synchronous replaced this in java 5
+	incrementAndGet(), getAndSet(3), addAndGet(3), compareAndSet(0, 1); //if 0 already exists, then only it will update
+5. synchronized
+	Object level lock: Lock acquired ONLY for single individual object's ALL threads
+		synchronized (this) {..} //Inside method lock for a block
+		public synchronized void run() {..} //Whole method lock with method signature
+	Class level lock: Lock acquired for ALL Objects with ALL threads
+		can be obtain by: synchronized(MyClass.class) {..} //Inside method
+6. Deadlock: occurs when processes block each other with resource acquisition and makes no further progress
+	Livelock: is a special case of resource starvation. It occurs when processes block both for same resource acquisition
+		Eg. Two people meet in a narrow corridor. Both repeatedly move the same way at the same time
+	Race condition: It occurs when two or more threads operate on the same object without proper synchronization. May produce exception**
+		Eg. In a banking application, multiple users attempts to withdraw funds from the same account simultaneously
+	Starvation: Increased priority of some threads and lowered priority of others. At run time, lower priority threads rarely get a chance to run
+7. CyclicBarrier is used to make threads await for each other using await(); //Note wait() is different from Object
+	CyclicBarrier cb=new CyclicBarrier(4); //This will execute each 4 threads and wait to complete the cycle
+	CyclicBarrier(4, Runnable); //With this method Runnable executes every 4 Thread cycles completes
+	ExecutorService es=Executors.newCachedThreadPool();
+	IntStream.iterate(1, i->i+1).limit(5).forEach(i->es.submit(()->waitTillFinished(cb)));
+	waitTillFinished => try {
+		cb.await(); //After 4 threads cycle completes, next 5th thread expect 3 more thread and wait without end even after shutdown
+	} catch (InterruptedException | BrokenBarrierException e) {
+		throw new RuntimeException(e);
+	}
+	es.shutDown();
+8. ReadWriteLock lock=new ReentrantReadWriteLock();
+	Lock writeLock=lock.writeLock();								Lock readLock=lock.readLock();
+	public void put(String key, String val) {						public String get(String key) {
+        try {															try {
+            writeLock.lock();												readLock.lock();
+            map.put(key, val);												return map.get(key);
+        } finally {														} finally {
+            writeLock.unlock();												readLock.unlock();
+        }																}
+    }																}
+	private volatile ReentrantLock rLock=new ReentrantLock(); //new ReentrantLock(true); with fairness true. Default false
+	void print() {
+		rLock.lock(); //Same as synchronized, no return. But tryLock() return boolean. tryLock(1, TimeUnit.SECONDS) with timing lock available
+		try {
+			//task
+		} finally {
+			rLock.unlock(); //unlock() can be used for every lock() OR tryLock(). Else RTE IllegalMonitorStateException
+	}}
+ a. rLock.lock(); //It locks all coming threads until before one reach rLock.unlock(). Executes one by one
+ b. boolean locked=rLock.tryLock(); //Already some thread acquired this rLock & not reached rLock.unlock() then not lock it & return false. Else true
+ c. if(rLock.tryLock(10, TimeUnit.SECONDS)) {..} //Even for the above statement, it will wait for 10 sec & check any lock is released
+ d. int cnt=rLock.getHoldCount(); //Gives number of thread acquired on this rLock
+ e. boolean locked=rLock.isLocked(); //Gives the currently any resource acquired this lock
+ f. boolean fair=rLock.isFair(); //Fair means process threads by order t1,t2,t3. Unfair means random order to complete fast. Default is Unfair
+9. ConcurrentSkipListSet, ConcurrentSkipListMap are sorted thread-safe collections**
+10. Volatile: Threads can read value from main memory while other threads update it in cache memory (Takes time to update in main memory)
+11. var cw=new CopyOnWriteArrayList<>(List.of(1, 2, 3)); //Add/remove while iterating by MULTIPLE threads. NOT throw ConcurrentModificationException
+		for (int i : cw) {cw.add(1);} //Result is [1, 2, 3, 1, 1, 1]
+	var lb=new LinkedBlockingDeque<>(List.of(1, 2, 3)); //Each time value is added in iteration at end & process it. So its infinite & need condition
+		for (int i : lb) {if(i==3) lb.add(4);}//Result is [1, 2, 3, 4]
+	var cs=new ConcurrentSkipListSet<>(List.of(1, 2, 3)); //Same as LinkedBlockingDeque. Only duplicates not allowed. Condition needed or like below
+		for (int i : cs) {cs.add(4);} //[1, 2, 3, 4]
+	var list2=Collections.unmodifiableList(list1); //Is like List.of(..). But if any change in list1 that reflect on list2. list2 cannot change
+12. Methods for thread
+	t1.join(), t1.join(1000): Upcoming threads has to wait until the current t1 thread completes
+	Thread.yield(): Pause the currently executing thread temporarily & allow other threads to execute
+	wait, notify, notifyAll: These are in Object class. These should be in synchronized block. Else IllegalMonitorStateException
+		Every wait() needs to be called with each notify(). If wait(ms) called then notify not required
+13. Thread is on synchronized state cannot be interrupted. Only waiting state (wait/sleep) can interrupted
+
+STREAMS
+-------
+Stream: A sequence of objects that supports various methods which can be pipelined to produce the desired result
+A. [Source] => list, set
+B. [Stream] => .stream(), .parallelStream(), Stream/(Int/Long/Double)Stream
+C. [Intermediate operation] => filter(), map(), mapToInt/mapToLong/mapToDouble/mapToObj(), flatMap(), flatMapToInt/MapToIntLong/MapToIntDouble(),
+	mapMulti()?, distinct(), sorted(), limit(), skip(), takeWhile(), dropWhile()
+D. [Terminal operation]		=> forEach(), forEachOrdered(), toArray(), toList(), reduce(..), collect(..), count(), max/min(comp),
+	findFirst(), findAny(), anyMatch(pre), noneMatch(pre), allMatch(pre)
+	a. 	Function<String, String> f1=(String a)->{return a;};
+		Function<String, String> f1=(var a)->a; //String can replaced by var & Bracket with return can be removed only together
+		Function<String, String> f1=a->a; //Brace can be avoided for single param
+	b. DoubleToLongFunction fn=(double d)->(long) d; //Input param type can be only var/double. CANNOT be Double applicable for all other FI
+	c. stream1.filter(Predicate).map(Function).flatMap(Function).forEach(Consumer).findAny().orElseGet(Supplier);
+		Predicate<String> pre=(name)->name.startsWith("M");
+		Function<String, Integer> fn=(num)->Integer.valueOf(num);	//fn=Integer::valueOf;
+		Consumer<String> con=(name)->System.out.println(name);		//con=System.out::println;
+		Supplier<String> sup=()->"Hello";
+1. Function Interface: is SAM (Single Abstract Method) Interface contains one abstract method. Can have any number of (default/static/private) methods
+	Mostly used functional interfaces,
+	FUNCTIONAL INTERFACE	(function->return type)		ADDITIONAL FI								PARAM & RETURN DETAIL FOR FIRST ONE
+	-----------------------------------------------------------------------------------------------------------------------------------
+	1.	Function<T,R>.apply(T)->R																=>	Any param P & any return type R
+		BiFunction<T,U,R>.apply(T,U)->R														=>	Any 2 Type param & any return type
+		UnaryOperator<T>.apply(T)->T		extends Function<T,T> 								=>	Any Type param & return Type
+		BinaryOperator<T>.apply(T,T)->T		extends BiFunction<T,T,T> 							=>	Same 2 Type param & return Type
+		IntFunction<R>.apply(int)->R, 				=> LongFunction, DoubleFunction				=>	int param & any return type
+		IntUnaryOperator.applyAsInt(int)->int 		=> LongUnaryOperator, DoubleUnaryOperator	=>	int param & int return type
+		IntBinaryOperator.applyAsInt(int,int)->int 	=> LongBinaryOperator, DoubleBinaryOperator	=>	Two int param & int return type
+		ToIntFunction<T>.applyAsInt(T)->int, 		=> ToLongFunction, ToDoubleFunction			=>	Any param & int return type
+		ToIntBiFunction<T,U>.applyAsInt(T,U)->int 	=> ToLongBiFunction, ToDoubleBiFunction		=>	Any 2 params & int return type
+		IntToLongFunction.applyAsLong(int)->long	=> IntToDoubleFunction						=>	int param & long return type
+		LongToIntFunction.applyAsInt(long)->int		=> LongToDoubleFunction						=>	long param & int return type
+		DoubleToIntFunction.applyAsInt(double)->int	=> DoubleToLongFunction						=>	double param & int return type
+	2. Predicate<T>.test(T)->boolean =>
+		BiPredicate<T,U>.test(T,U), IntPredicate(int), LongPredicate(long), DoublePredicate(double)
+	3. Consumer<T>.accept(T)->void =>
+		BiConsumer<T,U>.accept(T,U), IntConsumer.accept(int), LongConsumer.accept(long), DoubleConsumer.accept(double)
+		ObjIntConsumer<T,int>, ObjLongConsumer<T,long>, ObjDoubleConsumer<T,double)
+	4. Supplier<R>.get()->R =>
+		BooleanSupplier.getAsBoolean()->boolean, IntSupplier, LongSupplier, DoubleSupplier
+
+2. Stream: Most used methods in Stream class,
+	Stream<Integer> stream=Stream.of(1, 2, 3);
+	public interface Stream<T> extends BaseStream<T, Stream<T>> {
+		Stream<T> filter(Predicate<? super T> predicate);
+		Stream<R> map(Function<? super T, ? extends R> mapper);
+		IntStream mapToInt(ToIntFunction<? super T> mapper); LongStream mapToLong(ToLongFunction); DoubleStream mapToDouble(ToDoubleFunction);
+		Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper);
+		IntStream flatMapToInt(Function<? super T, ? extends IntStream> mapper); +Double, Long
+		Stream<T> sorted(), sorted(Comparator), peek(Consumer), limit(int), skip(long)
+		forEach(Consumer), collect(Collectors..), toList()
+		reduce(BiOpr); reduce(identity, BiOpr-accumulator); reduce(identity, BiFn-accumulator, BiOpr-combiner); //used in parallelStream
+		min(Comparator), max(Comparator), count(), anyMatch(Pre), allMatch(Pre), noneMatch(Pre), findFirst(), findAny(),
+		of(T), ofNullable(T), Stream.iterate(T, UnaryOperator)
+	}
+	IntStream => LongStream, DoubleStream
+				IntStream intStream1=IntStream.of(1,2);										IntSummaryStatistics iss=intStream1.summaryStatistics();
+				-----------------------------------------------------------------------------------------------------------------------------------
+	max/min		OptionalInt opMax=intStream1.max();	int a=opMax.getAsInt();					int max		= iss.getMax();
+	average		OptionalDouble opAvg=intStream1.average(); double b=opAvg.getAsDouble();	double avg	= iss.getAverage();
+	sum			int sum=intStream1.sum();													long cnt	= iss.getSum();
+	count		long cnt=intStream1.count();												long cnt	= iss.getCount();
+
+3. Stream methods
+	1. Terminal operation: (count, min, findAny). Stream<String> stream1=Stream.of("e","c","s","m","u");
+		stream1.count();//5,, stream1.min((a,b)->a.compareTo(b)); OR (String::compareTo) //Optional[c]
+	2. generate: Stream.generate(supplier) is an infinitive. It needs limit() to stop operation
+		Optional<Integer> first=Stream.generate(()->1).findFirst(); //findFirst/findAny will end the stream. Here limit not required
+		If sorted used before limit/findFirst it will make stream infinitive
+	3. iterate: Stream.iterate(T, UnaryOperator<T>);,, Stream.iterate(T, Predicate<? super T>, UnaryOperator<T>).limit(long);
+		IntStream iterate=IntStream.iterate(1, i->i+1).skip(3).limit(4); //limit must needed. otherwise it will not end
+        iterate.forEach(System.out::print); //4567
+		Stream.iterate("A", s->s.length()!=8, s->s+s).forEach(System.out::println); //Iterate will stop when length 8 reached. It will not print 8A
+	4. concat: Stream.concat(Stream, Stream); IntStream.concat(IntStream, IntStream); Same way LongStream, DoubleStream has concat
+		var odds=Stream.iterate(1, a->a+2); //1,3,5..
+		Stream<Integer> evens=Stream.iterate(0, a->a+2); //0,2,4..
+        Stream<Integer> limit=Stream.concat(odds, evens).parallel().limit(3); //Result may 3,5,1. If odds has limit 2 then result is 1,3,0
+		Stream.concat(IntStream.of(), IntStream.of()); //CE. Stream.concat should not have IntStream**
+	5. collect: StringBuffer sb=Stream.of("h","e","l","l","o").collect(()->new StringBuffer(),(sb1,val)->sb1.append(val),(sb1, sb2)->sb1.append(sb2));
+		.collect(StringBuffer::new, StringBuffer::append, StringBuffer::append); =>hello. Supplier<R>, BiConsumer<R, ? super T>, BiConsumer<R, R>
+	6. stream1.forEach(consumer1); stream1.forEachOrdered(consumer1); //Only available in Stream. It process in the insert order not in sort
+		forEach accepts only consumer. CANNOT accept Int/Long/DoubleConsumer**
+		List/Set also has forEach method. it comes from interface Iterable
+	7. peek, distinct: Stream stream1=Stream.of("a","a","c","m","z");
+		stream1.peek(consumer); //Can be used for update any fields of objects & debugging purpose. It will be executed only if it has terminal
+		stream1.distinct().forEach(System.out::print); //acmz
+	8. flatMap: List<Employee> empList=List.of(new Employee(1, List.of("9991", "9992")), new Employee(2, List.of("9993", "9994")));
+		empList.stream().flatMap(emp->emp.phones.stream()).forEach(System.out::println); //Print all 4 numbers in single Stream/List
+		IntStream is=Stream.of(List.of(1), List.of(2)).flatMapToInt(ll->ll.stream().mapToInt(i->i)); //flatMapToInt needs IntStream, not Stream**
+		flatMapToInt: IntStream is=empList.stream().flatMapToInt(emp->IntStream.of(emp.getId()));
+	9. reduce: var stream1=List.of(1, 2, 3).stream();
+		stream1.reduce(BiOpr<T>); => ((a,b)->a+b;) //a: Initially 1st val & then returned val. b: is 2nd,3rd..
+		stream1.reduce(identity, BiOpr<T>-accumulator); => (0, (Integer a, Integer b)->a+b) //a: identity & returned val b: is 1st,2nd,3rd..
+		intStream1.reduce(identity, IntBiOpr<T>-accumulator); => (0, (int a, int b)->a+b) //a: identity & returned val b: is 1st,2nd,3rd..
+		stream1.reduce(identity, BiFn<T,U,T>-accumulator, BiOpr<T>-combiner); //Only used for parallelStream reduce process
+		Eg. students.parallelStream().reduce("Name:", (name, stu)->name+stu.name()+", ", (name1, name2)->name1+name2); **
+			Output=> Name:Raja, Name:Arun, Name:Manoj, Name:Bala,
+		int sum=IntStream.of(1,2,3).reduce(5, (i,j)->i+j); //param i to store init-value 5 once & sum val. j for each element. Result is 11
+		int sum=IntStream.of(1,2,3).reduce(5, Integer::sum); //It can be replaced
+		int sum=Stream.of(1,2,3).parallel().reduce(1, (a,b)->a+b, (a,b)->a+b); //Result is 9. Identity 1 add for each value. Not like above
+	10. sorted: Comparator<String> comp=(a, b)->a.compareTo(b); OR Comparator.naturalOrder(); Stream.of("b","a","c").sorted(comp); //abc
+		stream1.sorted(Comparator.reverseOrder()); //cba
+
+4. IntStream
+	1. var odds=IntStream.iterate(1, a->a+2).limit(3); var evens = IntStream.iterate(2, a->a+2).limit(3);**
+		IntStream.concat(odds,evens).limit(5).sum(); //1,3,5,2. Takes all values from odds first, If it is complete then it go for evens stream
+		IntStream.range(1,4); //1,2,3,, IntStream.rangeClosed(1,4); //1,2,3,4
+	2. IntSummaryStatistics: (LongSummaryStatistics, DoubleSummaryStatistics)
+		IntStream intStream1=Stream.of(1, 1, 2).mapToInt(i->i);
+        intStream=IntStream.generate(()->new Random().nextInt()).limit(5); //nextInt()/(ed)/(st,ed). Also has long, float, double, boolean
+		IntSummaryStatistics intSummaryStats=intStream1.summaryStatistics();
+		intSummaryStats.getSum()->long, getAverage()->double for all, getCount()->long for all, getMin()->int, getMax()->int
+	3. Stream has only max, min methods with comparator. But IntSteam only has additional avg & sum
+
+5. Collectors: Stream<String> stream1=Stream.of("j","a","v","a");
+	1. String res=stream1.collect(Collectors.joining()); //java,, Collectors.joining("-"); //j-a-v-a
+		Double avg=stream1.collect(Collectors.averagingInt(String::length)); //1.0 averagingInt(ToIntFunction), Also have for Long & Double
+	2. Long cnt=stream1.collect(Collectors.counting()); //4 number of input elements
+	3. Collectors.summingInt(ToIntFunction); //return sum of int. Also have summingLong(ToLongFunction), summingDouble(ToDoubleFunction)
+		Integer sum=students.stream().collect(Collectors.summingInt(s->s.getId()));
+	4. Collectors.filtering(predicate, collector); //Used collector with filter
+		collect(Collectors.filtering(student->student.id()%2==0, Collectors.toList()));
+	5. Collectors.partitioningBy(predicate) =>returns Map<Boolean, List<T>>; //Spilt collection into 2 parts true & false even elements not exists**
+		Collectors.partitioningBy(Predicate, Collector);
+		Eg. Map<Boolean, List<Employee>> map=empStream.collect(Collectors.partitioningBy(emp->emp.age>30));
+	6. Collectors.groupingBy(Function-classifier) =>return Map<K, List<T>>; split n Lists with group by Type
+		.groupingBy(Function-classifier, Collector-downstream)
+		.groupingBy(Function-classifier, Supplier-mapFactory, Collector-downstream)
+		.groupingByConcurrent(..) can be used for parallelStream
+		Eg. Map<String, List<Employee>> map=empStream.collect(Collectors.groupingBy(emp->emp.dept));
+		.collect(Collectors.groupingBy(Item::getPrice)).forEach((key,val)->{System.out.print(key);}); //BiConsumer. So forEach(System.out::print); CE
+		Collectors.partitioningBy method result can be achieved by also in Collectors.groupingBy
+	7. Collectors.toMap =>Convert collection to Map
+		Collectors.toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper)
+		Eg. Map<Integer, String> stuMap=students.stream().collect(Collectors.toMap(Student::id, Student::name));
+			toMap(p1, p2, BinaryOperator<U> mergeFunction)**?
+			toMap(p1, p2, p3, Supplier<M> mapFactory)
+			Also have Collectors.toConcurrentMap(..), Collectors.toUnmodifiableMap(..)
+	8. ConcurrentSkipListSet<Object> list=Stream.of("c", "a", "t").parallel().collect(ConcurrentSkipListSet::new, ConcurrentSkipListSet::add,
+		ConcurrentSkipListSet::addAll); //[a, c, t],, p1=>csl; p2=>(csl,el)->csl.add(el); p3=>(csl1,csl2)->csl1.addAll(csl2);**
+	9. Collectors.teeing(Collector-downstream1, Collector-downstream2, BiFun-merger)
+		Eg. record EmployeeSummary(long count, int sum) {}
+			EmployeeSummary empSummary=Stream.of(new Employee(1, 20), new Employee(2, 23), new Employee(3, 22)).collect(Collectors.teeing(
+			Collectors.counting(), 					//a (Collectors1)
+			Collectors.summingInt(p->p.age), 		//b (Collectors2)
+			(a, b)->new EmployeeSummary(a, b))); 	//passing above a,b (BiFunction)
+			result: Employee[count=3, sum=65]
+	10. List<String> ll=emps.stream().collect(Collectors.mapping(Emp::getName, Collectors.toList())); map(Emp::getName).collect(Collectors.toList());
+	11. IntSummaryStatistics is=emps.stream().collect(Collectors.summarizingInt(e->e.getId())); //{count=3, sum=6, min=1, average=2.000000, max=3}
+	12. IntStream.of(1).collect(Collectors.toList()); //CE. Collectors CANNOT used for IntStream. Used only for Stream**
+	13. List<Integer> list1=Stream.of(1).toList(); //Gives immutable list1 like List.of(1). So new values cannot be added into list1
+		List<Integer> list2=Stream.of(1).collect(Collectors.toList()); list2.add(2); //OK. Possible
+
+6. Optional & Method reference
+	1. Container object which may/may not contain non-null value. isPresent() return true, if value present & get() returns the value
+		a. Optional<Object/String/..> empty=Optional.empty();		//Empty Optional
+		b. Optional<String> opNullable=Optional.ofNullable(null);	//Possible NO-CE-RE
+			opNullable.isEmpty(); //true,,  opNullable.isPresent();	//false,, opNullable.get(); //Gives value if present. Else NoSuchElementException
+		c. Optional<String> opNull=Optional.of(null);	//NO-CE. But RE
+		d. opNullable.orElse("new object");	//New value, if it is null
+		e. opNullable.orElseGet(Consumer); 	//consumer for new value, if null
+		f. opNullable.orElseThrow();		//NoSuchElementException	.orElseThrow(()->new RuntimeException("Exp")); //With Supplier
+		g. opNullable.ifPresent(Consumer);	.ifPresentOrElse(Consumer, Runnable); //Return void. Consumer for present, Runnable for orElse
+		h. Optional<T> along with OptionalInt (oi.getAsInt()), OptionalLong, OptionalDouble => final classes
+	2. Method reference examples,
+		a. Consumer<String> 						con=val->System.out.println(val);		=> con=System.out::print;
+		b. Supplier<Student> 						sup=()->new Student();					=> sup=Student::new;
+			Random r=new Random(); Supplier<Long> 	sup=()->r.nextInt();					=> sup=r::nextInt;
+		c. Function<String, String> 				fun=val->val.toUpperCase(); 			=> fun=String::toUpperCase;
+		d. BiPredicate<String, String> 				pre=(a,b)->a.contains(b); 				=> pre=String::contains;
+			String str="java"; Predicate<String> 	pre=val->str.contains(val);				=> pre=str::contains;
+			String str="java"; Predicate<String>	pre=val->val.contains(str);				=> NA
+		e. var varA="a"; 							stream1.filter(str->varA.equals(str));	=> strStream.filter(varA::equals);
+		f. Predicate<String> pre=str->str.isEmpty(); OR String::isEmpty; //But for negation MR CANNOT used, only way is str->!str.isEmpty();**
+
+7. Additional
+	1. Applicable/Existing functions, params & return types always primitive. Eg. DoubleToIntFunction(double)->int
+	2. Reduction operations: The JDK contains many terminal Reduction operations (such as average, sum, min, max, and count)
+		that return one value by combining the contents of a stream
+	3. A stream created & assigned to var. Then var can execute the terminal ONCE. Next time it will give IllegalStateException
+	4. function1.andThen/compose(function2), predicate1.and/or(predicate2).negate()), consumer1.andThen(consumer2)
+		Function<Integer, Integer> fn1=(a)->a+2, fn2=(a)->a*2, combined=fn1.compose(fn2);
+        System.out.println(combined.apply(5)); //andThen process left to right 14. compose process right to left =>12
+	5. Collection has only methods stream()/parallelStream(). Both returns stream. But stream has only parallel() method
+	6. Iterator<String> iterator=list.iterator is simple representation of series of elements
+		It has list.iterator().forEachRemaining(Consumer) method
+	7. Spliterator<Integer> spliteratorObj=Stream.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10).spliterator(); //half1:5+half2:6
+        System.out.println("First half"); //If trySplit is not used then spliteratorObj has all elements
+        Spliterator<Integer> spliteratorFirstHalf=spliteratorObj.trySplit(); //trySplit returns 1st half. Used for one time, 2nd time useless
+        boolean hasVal=spliteratorFirstHalf.tryAdvance(System.out::println); //0 tryAdvance for next one element. If exists return true**
+        spliteratorFirstHalf.tryAdvance(System.out::println); //1
+        spliteratorFirstHalf.forEachRemaining(System.out::println); //2 3 4 forEachRemaining for rest all elements
+        System.out.println("Second half");
+        spliteratorObj.tryAdvance(System.out::println); //5
+        spliteratorObj.forEachRemaining(System.out::println); //6 7 8 9 10
+		Spliterator<String> spliterator=Stream.generate(()->"x").spliterator(); //.forEachRemaining will not terminate. But .tryAdvance will work
+	8. findFirst() =>Ordered stream (List) gives 1st element for serial & parallel. Unordered stream (Set) gives any element for serial & parallel
+	9. Variable is created outside & used for lambda should be effectively final (Even if not mentioned by final keyword). Cannot re-assign value
+		Eg. int val=3; //val=2; //This assignment gives CE in next line lambda expression
+			Stream.of(1, 2, 3, 4).filter(i-> i>val);
+	10. ParallelStream may execute faster & also may execute slower (When findFirst is called)
+	11. Stream<Integer> stream1=intStream1.boxed(); //Method converts Int/Long/DoubleStream to Stream<Integer+>
+	12. Terminal operation only triggers the operation. If no terminal then pipeline will NOT run
+	13. Stream<Integer> integerStream1=Stream.of(1, 2), integerStream2=List.of(1, 2).stream();
+        List<Integer> integers=List.of(1, 2); IntStream intStream1=integers.stream().mapToInt(a->a); //Difference of Stream<Integer> & IntStream
+	14. intStream1.parallel(); //Gives only IntStream. To make it parallel general Stream => intStream.boxed().parallel();
+	15. list.replaceAll(UnaryOperator). students.replaceAll(stu->stu.name()=null?new Student(stu.id,"Name"):stu);
+	16. IntFunction<T> has (int a) param & return Type <T>. ToIntFunction<T> has (T t) param & return int value**
+	17. n->new ArrayList<>(n); => can be written as ArrayList::new;**
+	18. IntStream.of(1,2,3,4,5,1,2).dropWhile(i-> i<3).forEach(System.out::println); //Drops i until i<3. Result 3 4 5 1 2
+		IntStream.of(1,2,3,4,5,1,2).takeWhile(i-> i<3).forEach(System.out::println); //Takes i when i<3. Result 1 2
+	19. forEach() & forEachOrdered() available in stream. But Collection has only forEach() method**
+	20. Function<Integer, Boolean> fn=(Integer i)->i==1; //OK,,  fn=(int i)->i==1; //CE
+	21. var runnable=()->System.out.println(); //CE. Lambda expression CANNOT declare with var. But param can declare it**
+	22. Predicate<Character> pre=ch->{char ch2='a'; return true;}; //variable (ch & ch2) can redeclare after Lambda expression line. Before its CE
+	23. List<Integer> integers=List.of(1, 2, 3); //Always gives List of Integer. Cannot assign to List<Long> OR other Type
+
+Record (java 14)
+------
+Record is FINAL IMMUTABLE class that require only type and name of fields. Implicitly record is a final. So cannot use it as anonymous class
+	interface ProgramInfo {
+		String getDetails();
+	}
+	record Program(int id, String name, List<String> participants) implements ProgramInfo {
+        static int version;	//Can have only static variable. No instance variable CE
+        static { version=1; }
+        Program {								//All args compact constructor implicit by default. Cannot private
+            name=name == null ? null : name.toUpperCase(); //Make changes in values
+        }
+		//Program(int id, String name, List<String> participants) { this.id=id; this.name=name; this.participants=participants; }
+		//To use this canonical constructor above compact constructor commented out & param MUST match with field names & all assigned, Else CE
+        Program() { 							//Regular/canonical constructor for No args
+            this(0, "Program", null); 			//Must call all-args/any one (not recursive) of constructor, Else CE. Should not use this.id
+        }
+        Program(int id) { 						//Regular constructor for One arg
+            this(id, "Program", null);
+        }
+        public Program(int id, String name) {	//Any number of args Regular constructor
+            this(1, name, null);				//Must call any one of constructor with only this(..)
+        }
+        @Override public String getDetails() {	//Override interface method
+            return "Some details";
+        }
+        @Override public String name() {		//Override name method without get keyword
+            return name==null ? "no name" : name;
+        }
+        public void printInfo() {}				//Can have any instance methods
+		public static void aboutMe() {}			//Can have any static methods
+    }
+1. record must must declare with parentheses(), it should be empty() OR with params(int id)
+2. record has implicit getter/accessor method. Can access WITHOUT "get" word like program.Id(); program.name();
+3. Can ONLY have static variable. Instance variable is NOT allowed in record
+4. Can implements only interfaces. BUT CANNOT extends classes**
+5. If 2 objects created with same values for fields then obj1.equals(obj2) will be true**
+6. this.value CANNOT use in compact constructor in record
+7. new Program(1, "Program1", List.of("Person1", "Person2")); Its print like => Program[id=1, name=Program1, participants=[Person1, Person2]]
+8. record Hello<T>(T t) { public Hello(T t){this.t = t;}
+		<T> void print(T message) {System.out.println(t+"-"+message);}}
+	new Hello<String>("Hi").print(4); //OK Hi-4
+9. By default record has toString, equals, hashCode, accessor without "get" word. No mutator
+10. record can have 1 varargs record (int...a) at last as usual
+11. Cannot assign value for any variable from any method
+
+sealed class (java 17)
+------------
+sealed class Color permits Red, Blue, Color.Green { //permits optional since all in same/inner class
+    non-sealed class Green extends Color {}}
+final class Red extends Color {}
+sealed class Blue extends Color {}
+final class LightBlue extends Blue {}
+
+1. sealed class/abstract-class/interface having control over who can extend a given extensible type
+2. sealed class must extend/implement by another (final, sealed or non-sealed) class/abstract-class/interface/record
+3.	(a) sealed class must mention permits classes, if permitted classes are in different class file. Also permitted class must extend it
+	(b) permits is an optional, Only when all permitted classes are in Same-class file OR Inner-class OR Mixed
+	(c) If permitted classes are in same-class OR Inner-class then permits can be added for all together, NOT for one or few
+	(d) If permits is added 1 outside package class, it also should be added for all other permitted class even in same file/inner class
+	(e) All permitted classes should have keyword among
+		> sealed 		(should permits any of these 3 classes again, Else CE)
+		> non-sealed	(Like normal class, any class can extend. Its ends sealed hierarchy)
+		> final			(Like final class, no class can extend. Its ends sealed hierarchy)
+	(f) sealed interface can also permits classes to implement
+	(g) sealed interface can permits record to implement it. But not require to add sealed/final since its already final**
+Eg. Color class can be extended by Green or Blue class. Not by the Circle or Square class. Its represents about Shape
+	Case 1: permits keyword mandatory
+		File A: sealed class Color permits Red, Green {..} //With permits
+		File B: non-sealed class Red extends Color {}
+		File C: final class Red extends Color {}
+	Case 2: permits keyword optional
+		sealed class Color permits Color.Green { //permits "Color.Green" keyword optional for inner class. Default permits
+			final class Green extends Color {} }
+	Case 3: permits keyword optional
+		File A: sealed class Color {} //permits keyword optional for same file class. Default permits
+		File A: final class Green extends Color {}
+
+LocalDate, LocalTime, LocalDateTime, ZonedDateTime->implements Temporal
+--------------------------------------------------
+LocalTime beforeLT=LocalTime.of(11,30,30,5); LocalTime afterLT=LocalTime.of(12,35,0,0);
+Duration dur1=Duration.between(beforeLT, afterLT); //Duration for LocalTime. Has get(), getNano(), getSeconds()
+dur1=dur1.plus(1, ChronoUnit.HOURS); //plusNanos/Seconds/Minutes/Hours/Days(); //Max days. Also has minus(). Must initialize to update
+System.out.printf("%s, %s", dur1, dur1.getNano(), dur1.getSeconds()); //PT1H4M29.999999995S, 999999995, 3869, Reverse PT-1H-4M-29.999999995S
+Duration dur1= Duration.ofMinutes(1); //.ofNanos/Millis/Seconds/Minutes/Hours/Days(1); //Last one will be considered
+LocalTime localTime=LocalTime.now().plusHours(1).plusMinutes(1); //All methods will work, since create new object & adding in builder**
+
+LocalDate oldDate=LocalDate.of(1987, Month.SEPTEMBER, 22); LocalDate newDate=LocalDate.of(2024, Month.AUGUST, 18);
+Period period1=Period.between(oldDate, newDate); //Period for LocalDate. Has getDays(), getMonths, getYears methods
+period1=period1.plus(Period.ofDays(1)); //plusDays/Months/Years; //Also has minus(). Must initialize to update
+System.out.printf("%s %s %s %s", period1, period1.getYears(), period1.getMonths(), period1.getDays()); //P36Y10M28D 36 10 28
+Period period1=Period.ofYears(1).ofMonths(2).ofDays(3); //Last method ofDays only consider, since its not a builder method, its static method**
+LocalDate.now().plus(..).plusDays(1).plusWeeks(1).plusMonths(1).plusYears(1); //All methods will work, since create new object & adding in builder**
+LocalDateTime.now().plusNanos(1).plusSeconds(1).plusMinutes(1).plusHours(1).plusDays(1).plusWeeks(1).plusMonths(1).plusYears(1);
+
+Duration.between(..); period1, dur1 has plus(), minus();,, localDate1, localTime1 has isBefore(localDate1), ifAfter();
+dur1, period1 has plural methods =>dur1.getSeconds+ (expect Nano)
+localDate1, localTime1, localDateTime1 has singular methods =>getHour(), getMonth, getDayOfMonth+. All plus/minus has plural methods
+localDate1.getMonth() gives enum value. localDate1.getMonthValue() only gives int**
+
+LocalDateTime oldDateTime=LocalDateTime.of(2024, 8, 13, 2, 10, 30); LocalDateTime newDateTime=LocalDateTime.of(2024, 8, 14, 0, 0, 0);
+Duration dur1=Duration.between(oldDateTime, newDateTime); //Duration for LocalDateTime=>PT21H49M30S //Cannot apply this in Period
+long seconds=dur1.getSeconds(); //86400. It has only getSeconds(), getNano()
+
+ZonedDateTime zonedDateTime=ZonedDateTime.of(localDate, localTime, ZonedDateTime.now().getZone()); //3rd param ZoneId zoneId=ZoneId.of("GMT+1");
+//2024-08-29T21:53:57.584764500+02:00[Europe/Amsterdam] && 2024-11-29T21:53:57.584764500+01:00[Europe/Amsterdam] //GMT +1 & +2 changing
+Instant instant=zonedDT.toInstant(); Instant ins1=instant.plus(1, ChronoUnit.DAYS); //zonedDT.toInstant(); localDT.toInstant(zoneOffSet);
+System.out.println(zonedDateTime+",,, "+ins1); //2023-01-01T23:30+01:00[Europe/Amsterdam],,, 2023-01-02T22:30:00Z
+Methods available: LocalDateTime(localDate1,localTime1),, ZonedDateTime(localDate1,localTime1,ZoneId.of("GMT+1"))
+
+Locale object represents a specific geographical, political, or cultural region
+1. Locale.setDefault(new Locale("nl", "NL"));
+	Locale loc1=new Locale("en", "IN");
+	loc1.getDisplayName(), loc1.getDisplayCountry(), loc1.getDisplayLanguage()); =>English (India), India, English
+	Locale loc2=new Locale.Builder().setLanguage("en").setRegion("IN").build();**
+	ResourceBundle car=ResourceBundle.getBundle("Car", loc1); String fuel=car.getString("fuel");
+	a. Search priority 1st Options =>1.Car_en_IN.properties, 2.Car_en.properties (1 & 2 both FILES not exists then goto step b) else 1,2,5
+	b. Search priority 2st Options =>3.Car_nl_NL.properties, 4.Car_nl.properties (3 & 4 both FILES not exists then goto step c) else 3,4,5
+	c. Search priority 3rd Options =>5.Car.properties (Still 5 non exists MissingResourceException)
+	d. Any of 1 OR 2) file exists, 1,2,5 does not have "fuel", though 4,5 has "fuel" then, it will give MissingResourceException**
+	ResourceBundle.getBundle("CARS", new Locale("FR","fr"); //NOT case sensitive. bundle.getString("Engine"); //Engine Case sensitive
+2. LocalDateTime, LocalDate, LocalTime, ZonedDateTime (All these handled in DateTimeFormatter. NOTE: There is NO -DateFormatter/-TimeFormatter)
+	=>DateTimeFormatter, NumberFormat, DecimalFormat, MessageFormat
+  a. LocalDateTime ldt=LocalDateTime.parse("2022-01-21T12:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	System.out.println(ldt.format(DateTimeFormatter.ISO_LOCAL_TIME)); //12:00:00
+	DateTimeFormatter.ISO_LOCAL_DATE => 2022-01-21, ISO_LOCAL_TIME => 12:00:00, ISO_LOCAL_DATE_TIME => 2022-01-21T12:00:00
+  b. LocalDateTime.of(localDate, localTime); of(y,m,d,h,m); of(y,m,d,h,m,s); of(y,m,d,h,m,s,ns);
+  c. LocalDateTime localDateTime1=LocalDateTime.of(2022, 3, 1, 5, 55);
+    DateTimeFormatter dateTimeFormatter=DateTimeFormatter.ofPattern("'DATE''s' yyyy MMMM dd"); //'DATE' print String value. '' result as '
+	System.out.println(dateTimeFormatter.format(localDateTime1)); //DATE's 2022 March 01
+	System.out.println(localDateTime1.format(dateTimeFormatter)); //Inverse case also gives same result
+  d. DateTimeFormatter form1=DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM); //For US default locale
+								LONG					MEDIUM						SHORT
+	.ofLocalizedDateTime(..)	Not Applicable			23 Jan 2024, 13:00:00		1/23/24, 13:00
+	.ofLocalizedDate(..)		23 January 2024			23 Jan 2024					1/23/24
+	.ofLocalizedTime(..)		Not applicable			1:00:00 PM					1:00 PM
+	.ofPattern("hh:mm:ss a")				01:00:00 PM
+  e. ZonedDateTime zdt=ZonedDateTime.now(); //zdt.getOffset(); =>+5:30 for India
+		Instant instant1=zdt.toInstant(); Instant plus=instant.plus(1, ChronoUnit.DAYS); //instant1 supports ONLY days OR smaller. NOT Week/+ **
+3.a. NumberFormat nf=NumberFormat.getCompactNumberInstance(new Locale("en", "IN"),NumberFormat.Style.LONG); //Default SHORT
+	System.out.println(nf.format(2_00_0000));//20L for both SHORT & LONG / In US SHORT (2M), LONG (2 million). NO MEDIUM here. Prints Math.round()
+  b. Locale.setDefault(Locale.US);
+	System.out.println(NumberFormat/DecimalFormat.getCurrencyInstance().format(1));->$1.00
+  c. DecimalFormat deFormat=new DecimalFormat("###,00.0##");
+	System.out.println(deFormat.format(1.22)); //01.22
+	0 means always display in output (0/val). # means display only digit exists. 0 CANNOT come before first # and after last #
+  d. System.out.println(MessageFormat.format("{0}={1}", 1, "one")); //1=one
+4. LocalDate,LocalTime,LocalDateTime implements Temporal, TemporalAdjuster. ZonedDateTime implements Temporal, ChronoZonedDateTime<LocalDate>
+
+IO API
+------
+abstract class InputStream#, (Focus only #)							OutputStream implements Closeable-I
+	1. FileInputStream# 												FileOutputStream
+	2. FilterInputStream# => BufferedInputStream#, DataInputStream		FilterOutputStream =>BufferedOutputInputStream,PrintStream,DataOutputStream
+	3. ObjectInputStream# 												ObjectOutputStream
+	4. ByteArrayInputStream												ByteArrayOutputStream
+
+abstract class Reader#,												Writer implements Closeable I
+	1. BufferedReader# 													BufferedWriter
+	2. InputStreamReader# => FilterReader#	 							OutputStreamWriter => FileWriter
+	4. CharArrayReader													CharArrayReader
+	5. PipeReader														PipedWriter
+	6. StringReader														StringWriter
+	7. NA																PrintWriter
+
+1. IOException required for =>file.createNewFile(), new FileWriter/Reader(file), bufferedWriter.flush()/.close(); path.toRealPath();
+	Files.walk(1),find(1,2,BiPre),copy(p,p),createFile(p),deleteIfExists(p),readAllLines(p),lines(p),delete(p)
+2. Exception not require for new File(path), file.exists(), file.delete()
+3. Files class**
+	a. Using Files & Path
+		Stream<Path> walk=Files.walk(path1); //Gives all file paths with files & folder along with empty folder
+		Stream<Path> list=Files.list(path1); //Gives all file paths with files & folder along without folder
+		Stream<Path> val=Files.find(path, maxDepth, BiPredicate);
+		Path copy=Files.copy(Path.of("d:/f1/a.txt"), Path.of("d:/f2/a.txt"), StandardCopyOption.REPLACE_EXISTING); //Must have full path
+		Path path=Files.move(Path.of("d:/f1/a.txt"), Path.of("d:/f2/a.txt"), StandardCopyOption.REPLACE_EXISTING); //Must have full path
+		REPLACE_EXISTING=>Replace it without Exception. ATOMIC_MOVE=>Make sure full file copied not partially
+		Stream<String> val=Files.lines(path);,, List<String> val=Files.readAllLines(path);,, Stream<Path> val=Files.list(path);
+		Files.createDirectories(Path.of("c:/a/b/c")); //create all non-existing folders, if all OR one does not exists
+		Files.createDirectory(Path.of("d:/a/b/c")); //Creates only last folder. Folders before last should be exists else RTE
+		Files.createFile(Path.of("c:/manoj/doc/m.txt")); OR Path can be Path.of("c:/manoj/doc/", "m.txt"); //Same like directory if exists
+			//Creates new File, if all dirs exists, else NoSuchFileException. If dirs/file already exists it throw FileAlreadyExistsException
+		Path path=Paths.get("c:/m.txt"); Path.of("c:/m.txt"); Path.of(new URI("")); Paths.get(new URI("")); FileSystems.getDefault().getPath("");
+		boolean created=new File("c:/dir1/dir2/dir3").mkdir(); //Create dir3 folder, only if all previous directories exists
+		boolean created=new File("c:/dir1/m.txt").createNewFile();//Create m.txt file, only if dir1 exists
+	b. Using File
+		File dir=new File("c:/manoj");
+        if (!dir.exists()) {
+			boolean newFile=dir.mkdir();
+            new File("c:/manoj/m.txt").createNewFile(); }
+	c. Absolute path starts with parent directory like c:/manoj/ OR /app/manoj/
+		Relative path starts with current directory like ./manoj/d1/ OR manoj/d1/
+		Path a=Path.of("/a"); //ABS path, Path b=Path.of("b"); //REL path
+        System.out.println(a.resolve(b)); //p1 first one, p2 second one => OP: \a\b,, System.out.println(b.resolve(a)); //OP: \a
+		//resolve always finds for ABS starts by "/"
+		//If both ABS(\a)+ABS(\b)=>\b. If ABS(\a)+REL(.\b)=>\a\b. If REL(.a)+ABS(\b)->\b
+		//If you have Path as {"c:/./app/./dir1/"} same as => {"c:/app/dir1/"}
+		Path p1=Paths.get(".","song","..","/note"); =>.\song\..\note
+		p1=p1.normalize(); //After normalize =>note
+		* Path.of("/a/b/c").relativize(Path.of("/a/b/c/d")); =>d,, "/a/b/" & "/c/d"=> ../../c/d. Both should be Relative/Absolute. Else RTE**
+		* Path p2=Path.of("c:/a/b/y.txt").resolveSibling("z.txt"); //It will change only last file name =>c:/a/b/z.txt
+		* Path.of("/a/../b/c").normalize()); =>\b\c,, Path.of("/a/b/c").subpath(1,2); =>b,, Path.of("/a/b/c").subpath(1,9); =>b/c**
+		* Path.of("/c:/symbolicLinkPath").toRealPath(); //Gives real path for this symbolic link path
+		* Path path = Path.of("c:/a/b/c");		path.getRoot()=>c:\ 		path.getParent()=>c:\a\b
+		* Path.of("c:/a/./b/../c").getNameCount(); //5 c: not counted. /./ /../ counted,, getName(0); //Gives Path =>a. Not c:
+	d. Stream<Path> fs=Files.walk(path, maxDepth); //Gives stream. int maxDepth =>How many dir inside to go from path dir
+	e. Stream<Path> fs=Files.find(Path, int-maxDepth, BiPredicate<Path, BasicFileAttributes>); //Gives Stream<Path> with filter
+		Stream<Path> walk=Files.find(Path.of("d:/temp"),5,(path,attributes)->attributes.isRegularFile()); //d:\temp\file1\file.txt
+	f. boolean sameFile=Files.isSameFile(path1, path2);
+		1. If path1 & path2 are ABS path like (/a/b/c) then it compares path contents & return boolean without any exception even dir NOT exists
+		2. If any path is REL, it will check relative dir is exists. If not found throws NoSuchFileException
+		3. Files.isSameFile(p1, p2); // If p1, p2 both in different locations & though content same=>false. Same location only gives true
+	g. long mm=Files.mismatch(path1,path2); //-1 if both path same OR file content same. Else mismatch letter (case ignored) index position
+	h. List<String> list=Files.readAllLines(path);	Stream<String> list=Files.lines(path);
+	i. boolean regular=Files.isRegularFile(path); //If its file =>true. If its dir OR not exists =>false
+4. try (var s=System.out;) {} //If try with resource like this, it will close the PrintStream, so sOut will NOT print after this
+5. InputStream methods
+	a) is.read(); 							b) byte[] b=new byte[5]; is.read(b); //Read & store 5 bytes in b
+	c) is.skip(5); //Skip 5 bytes			d) is.mark(5); //Mark this position. Only ByteArrayInputStream supports. check with MarkSupported()
+	e) is.reset(); //Reset to mark position
+        Its recommended to check is.markSupported()=>boolean, before call mark(int) function. If not supported it throws IOException
+        try (var is = new FileInputStream(source); var os = new FileOutputStream(target)) {
+        byte[] data = new byte[100]; int len;						// int chirps;
+        while ((len = is.read(data)) > 0) {							// while ((chirps = is.read()) > 0)
+            os.write(data, 0, len);									// os.write(chirps);
+        }} //Copy each 100 bytes or less							// Copy one by one	
+6. new ObjectOutputStream(new FileOutputStream("")).writeObject(emp); //Same way read using ObjectInputStream. Emp implements Serializable**
+	But transient field wont save. static field will not serialize. Whatever updated last to static will reflect
+7. To create object to stream, Emp class must implement Serializable otherwise it throws NotSerializableException**
+	If Emp has reference of other class those classes also implement Serializable. Else RTE NotSerializableException
+8. NIO.2 attribute interface advantage when read file**
+	a. Costs fewer round-trips to the file system		b. Supports file system dependent attributes
+9. Stream is byte-based object that can read and write bytes. Reader is Character Based, it can be used to read or write characters
+	BufferedReader is much faster and more efficient than FileReader
+	# FileReader		: 	Character Based. read() read by chars only. Used only for Files
+	# BufferedReader	: 	read(), readLine() can read characters and lines
+	# FileInputStream	:	Byte Based, it can be used to read bytes
+	If you want read large file Stream can be suitable
+10. ObjectInputStream can read without null check in while loop (Not like FileInputStream) as below,
+	 Student student=(Student) ois.readObject(); //Correct way. It needs throws IOException, ClassNotFoundException**
+	 while ((student=(Student) ois.readObject()) != null) { //Wrong RTE EOFException
+11. Console methods: Console con=System.console();
+	String name=con.readLine("%s", "Enter name"); //OR con.readLine();
+	char[] chars=con.readPassword();	int read=con.reader().read(); //It return ASCII value of one char
+	Also have PrintWriter writer=con.writer(); Console printf=con.printf(""); Console format=con.format("");
+12. /app => root of the current drive;; ./app/ => current directory=app/;; ../app/ => parent of the current directory (app)
+13. Files.createFile(path);=>path, .delete(path); .exists(path);=>boolean
+14. IOException necessary for toRealPath inside the map/filter in stream lambda expression**
+15. int=inputStream.read()/read(byte)/read(byte,int,int); outputStream.write(int)/write(byte)/write(byte,int,int);=>void
+
+JDBC
+----
+interface <CallableStatement> extends <PreparedStatement> extends <Statement> extends <AutoCloseable> {}
+PreparedStatement:
+Class.forName("oracle.jdbc.driver.oracledriver");
+try (Connection conn=DriverManager.getConnection("jdbc:oracle:thin:@host:1521:StuDB", username, password)) {
+	try (PreparedStatement statement=conn.prepareStatement("select * from customer_tbl where id=? ")) {
+		statement.setInt(1, 1);
+		try (ResultSet resultSet=statement.executeQuery()) {
+			while (resultSet.next()) {
+				System.out.println(resultSet.getString(2));
+			}
+		}
+	}
+}
+PreparedStatement pStatement=con.prepareStatement("sql");
+	a. ResultSet rs		= pStmt.executeQuery()	=> used to execute SELECT	(SELECT only)
+	b. int rowsAffected	= pStmt.executeUpdate()	=> used to execute SQL DML	(INSERT/UPDATE/DELETE). CANNOT use "SELECT" qry
+	c. boolean res		= pStmt.execute()		=> used to execute SQL DDL	(SELECT/INSERT/UPDATE/DELETE)
+
+CallableStatement:
+CREATE or replace PROCEDURE Marks_avg(IN group_in number(5), IN last_name_in varchar(20), IN subject_in varchar(20), OUT average int)
+	BEGIN
+	  SELECT avg(marks) average FROM students WHERE group=group_in and last_name=last_name_in and subject=subject_in;
+	END
+try (Connection conn=DriverManager.getConnection(url, username, password)) {
+	conn.setAutoCommit(false);
+	try (CallableStatement cStatement=conn.prepareCall("{?=call Marks_avg(?,?,?)}")) {
+		cStatement.setString(1, 11);
+		cStatement.setString(2, null);		//cStatement.setNull(2, java.sql.Types.VARCHAR); //Also fine with this
+		cStatement.setString(3, "Science");	//cStatement.setObject(3, "Science", java.sql.JDBCType.VARCHAR);
+		cStatement.registerOutParameter(1, Types.INTEGER);
+	}
+}
+1. Savepoint sp=conn.setSavepoint() //Marks the SavePoint,, conn.rollback(sp); //It rollbacks all changes until before sp
+2. setAutoCommit(true); by default. It update records without commit(). To use Savepoint =>setAutoCommit(false); conn.rollback(sp); //Else RTE
+3. One conn.rollback() OR (sp) will invalidate all further savepoint (sp2,sp3)
+4. So next if you try to rollback sp2 like conn.rollback(), it throws SQLException
+5. try (var conn=DriverManager.getConnection(""); var ps=conn.prepareStatement(""); var rs=ps.executeQuery()) {} //Needs to handle SQLException
+6. First setAutoCommit(false); After some operations changing setAutoCommit(true); will commits all previous transactions as well
+
+MODULE, PACKAGING & DEPLOYING
+-----------------------------
+1. A Module is a group of closely related packages & resources along with a new module descriptor file
+2. Three types of module (System Modules - Java SE & JDK modules)
+	a. Automatic	: It is on module-path WITHOUT module-info.java
+	b. Named 		: It is on module-path WITH module-info.java (Must be there, else considered automatic)
+	c. Unnamed 		: It is on class-path WITHOUT module-info.java
+3. module-info.java
+	module zoo.tours.reservation {		//Module should NOT contain any access specifier like public. Keep NAS
+		exports zoo.tours.reservation;	//Exporting this PACKAGE to other all modules to import
+		requires zoo.tours.api;			//Used to get all packages from MODULE (zoo.tours.api)
+		uses zoo.tours.api.Tour;		//Uses will when using ServiceLoader.load(Tour.class);
+	}
+	Keywords: module, exports, exports..to, requires, requires transitive, open, opens, opens..to, provides..with, uses - EROPU
+	Refer C7.Q17: exports must has package. requires must has module name
+	Module1 (name=> com.m1; package: com.m1.p1;)		Module2(name=> com.m2; package: com.m2.p2;)
+	Module-name -> Directive operate		Result
+	----------------------------------------------
+	com.m1-> exports com.m1.p1;				Exporting package com.m1.p1 to all other modules (which must use requires com.m1)
+	com.m1-> exports com.m1.p1 to com.m2;	Exporting package com.m1.p1 to only for module(com.m2) (which must use requires com.m1)
+	com.m2-> requires com.m1;				Module(com.m1) package accessible for module(com.m2)
+	com.m2-> requires transitive com.m1; 	If module(com.m3) has requires (com.m2), transitive module(com.m1) also accessible for module(com.m3)
+	open module com.m1 {}					open comes only module declaration. Module packages open for reflection. open & opens CANNOT be together
+	com.m1-> opens com.m1;					opens comes only inside module. Any module can use module(com.m1) for reflection
+	com.m1-> opens com.m1 to com.m2;		Module(com.m2) can use module(com.m1) for reflection
+	    NOTE: exports =>Must have package. requires =>Must have only module name**
+
+4. a. Consumer => b. Service Locator => c. Service Provider => d. Service Provider Interface. //Combine of b+d is a service
+	Service Creation. Refer C7.Q56***
+	NAME					MODULE-NAME				Directive with package											Directive
+	-------------------------------------------------------------------------------------------------------------------------
+	ServProviderInterface:	zoo.tours.api			exports	 zoo.tours.api; //ONLY exports with interface 			=>exports;
+	Service provider:		zoo.tours.agency		requires zoo.tours.api;
+													provides zoo.tours.api.Tour with zoo.tours.agency.TourImpl;		=>requires; provides..with;
+	Service Locator:		zoo.tours.reservation	exports  zoo.tours.reservation;
+													requires zoo.tours.api;
+													uses 	 zoo.tours.api.Tour;									=>exports; requires; uses;
+													//Advantage: Add functionality without recompiling application
+	Service Consumer: 		zoo.visitor				requires zoo.tours.api;
+													requires zoo.tours.reservation;									=>2 requires;
+	Service:				Combination of (Service locator & Service provider interface)
+
+		ServiceLoader<Tour> loader = ServiceLoader.load(Tour.class); //ServiceLoader implements Iterable
+		Optional<Tour> first = loader.stream().map(ServiceLoader.Provider::get).findFirst();
+		List<Tour> tours = loader.stream().map(provider->provider.get()).collect(Collectors.toSet());
+5. Commands, Compile & run module
+	javac -p mods -d consumerModule consumerModule/zoo/visitor/*.java consumerModule/module-info.java
+	jar -cvf mods/zoo.visitor.jar -C consumerModule/ .
+	java -p mods -m zoo.visitor/zoo.visitor.Tourist
+			-d directory						-cp --classpath OR --class-path
+			-m --module							-p --module-path								-s --summary
+6. Commands
+	java --list-modules =>List all modules
+	-d specifies directory											-p specifies module path
+	jdeps cookie.jar: list modules depends JAR with package names
+	jdeps -s cookie.jar: List depends JAR without listing package names. With modules summary
+	jlink --output:	To create runtime image output dir. --output mandatory for the output directory
+	java -m x -p y --show-module-resolution: Debugging module
+	jmod create/extract/list/hash
+	The show-module-resolution option is on the java command & the summary option is on the jdeps command**
+7. JDK supplied Modules: java.base(desktop,sql,logging,management,naming), jdk.javadoc(jdeps,net,jshell,xerces)
+8. A module in module path without module-info (Automatic): All of these packages are exported by default to other module classes**
+	A module in class path: Cannot accessed by any class in module path
+9. .JAR & .JMOD are legal format for a module
+10. Cyclic dependency in module will not compile. At least 2 modules required for cyclic dependency
+11. --add-exports in java command is NOT recommended. And there is no --add-requires command
+12. Top-down migration:	 A) Move all modules (m1,m2,m3) (m1->m2->m3, m1->m2) =>From classpath to module-path as automatic module
+						 B) Change automatic to named with module-info (less dependent module first m1 then m2 then m3)
+	Bottom-up migration: A) Move only one module (m3) which dependents for others =>From classpath to module-path as automatic module
+						 B) Move m2 then m1 to automatic module
+13. Module in the module-path cannot access the jar in class path. Also vice-versa
+----------------------------------------------------------------------------------------------------------------------------
+
+EXECUTION
+=========
+1. Block Execution, when create new object for Child
+	a. First, static {} block would call (All Parent to Child) in class (Its also calls when class loads without creating object)
+	b. Second, Parent instance block followed by Parent constructor would call
+	c. Third, Child instance block followed by Child constructor would call
+2. If code has Recursive method invocation, it leads only RTE. But Recursive constructor invocation gives CE
+	Eg. void a(){b();}	void b(){a();} //NO-CE in method level, but StackOverflowError
+		public A() {this();} //CE in constructor
+3. MyClass.InnerClass obj=new MyClass().new InnerClass();
+	MyClass.InnerStaticClass obj=MyClass.InnerStaticClass();
+4. Command line execution
+					Compilation								Execution
+	No package		javac Test.java							java Test
+	With Package	javac src\com\test\ConsoleTest.java		java -cp src com.test.ConsoleTest (class file generates in same .java path)
+	javac -d classes src/core/java/v8/pgm/ConsoleTest.java 	=> create classes/core/java/v8/pgm/ConsoleTest.class
+	java -cp classes core.java.v8.pgm.ConsoleTest //-cp 	=> --classpath OR --class-path
+5.  String a1="A"; String a2="A"; a1==a2; =>true But a1.toLowerCase()==a2.toLowerCase(); =>false,, If values "a" means =>true
+
+Points to verify the program has
+================================
+CE compile error
+----------------
+1. Read full program start to end for any compilation issue
+2. Check code in static method has called instance method or variable in class
+3. Check manually throwing exception has word "throw"
+4. Check exception hierarchy, catch from child to Parent FileNotFoundException->IOException->Exception. Multi-catch cannot contain these levels
+5. Check variable name is already used especially marked in program line
+6. Check functional interface methods. Eg. BooleanSupplier has getAsBoolean() not get() method
+7. enum values followed by semi colon; if method OR constructor comes further
+8. For Parent p=new Child(), verify overridden method call rightly. Sometime calls Child overloaded other method which gives CE
+9. A class extends/implements (abstract class OR interface) must implement the methods. Abstract classes not needed to implement
+10. Anonymous cannot be created for final class => final abstract class A {} A a=new A() {}; //CE
+11. Check Generic<T,R> match in streams. For filter(predicate) boolean, map(function) stream, forEach(consumer) void, orElseGet(supplier) object
+12. Check casting has done for Object to required class before call the class method
+13. Check variable is initialized inside {} and access it outside
+14. In abstract class abstract method should have abstract keyword**
+15. For try{} catch check "throw new" used properly. Inner try{} catch(Exception ex) verify variable ex NOT used for outer catch
+16. Check else condition is missed to return the value
+17. For Functional interface verify the relevant method. If UnaryOperator<Double> then, it must be =>(Double d)->d; NOT =>(double d)->d;
+18. For Functional interface verify param and return type. DoubleToIntFunction gets double and return int. double*int gives double. NOT Wrapper
+19. Check after Lambda expression declaration semi-colon; added
+20. future.get(); //Will wait until Thread completes. Must throws InterruptedException, ExecutionException OR surrounded by these exceptions
+	future.get(5, TimeUnit.SECONDS); //It waits for 5 seconds, if Thread not completes throws TimeoutException (Should have it in try)**
+21. Checks in stream: .stream() used before any intermediate operation. Proper ";" used. stream.sorted(comparator), Not sort(..)
+	Stream.concat(stream1,stream2); IntStream.concat(intStream1,intStream2);
+22. Check final variable assigned inline/constructor/block
+
+RTE Runtime exception (NO-CE)
+-----------------------------
+1. Read the sql query carefully
+2. Once TERMINAL operation used in stream, the stream will be closed, cannot use again. int sum=intStream.sum(); intStream.count(); //RTE
+3. Convert Object into stream must implements Serializable interface. If it has other class reference, those also implement Serializable. Else RTE
+	ReadObject from Stream gives Object, so typecast needed
+4. Check stmt.setString/Int(n); set for all bind (?) variables
+5. ResultSet rs=ps.executeQuery(); if (rs.next()) {rs.getString/Int(1);} //rs.next()=>boolean, Needed before get it
+6. To set conn.setSavepoint(); make sure conn.setAutoCommit(false); should be there
+
+Common check
+------------
+1. Read all options before select one answer
+2. Make sure List always give duplicate data. But Set does not give. Especially verify it while using in stream
+3. Know the answer But unknowingly changed the option especially multiple correct options**
+4. Clock moving time in Day light saving at should be 02:00. Not 14:00
+
+To Know More
+============
+OVERRIDE methods
+----------------
+public String toString() {return super.toString();}
+public boolean equals(Object obj) {return super.equals(obj);}
+public int hashCode() {return super.hashCode();}
+public final class String implements java.io.Serializable, Comparable<String>, CharSequence, Constable, ConstantDesc {..}
+
+PACKAGE
+-------
+import java.lang.*; (default import) 	-> String, Integer, Comparable, Exception, Error, Enum, Thread, ..
+import java.util.*;						-> Collection, List, Set, Map, Arrays, Calendar, Comparator, Properties, Date, Optional, Scanner, ..
+import java.util.stream.*; 				-> Stream, Int/Long/DoubleStream, Collector, Collectors, ..
+import java.util.function.*; 			-> Function, Predicate, Consumer, Supplier, ..
+import java.util.concurrent.*; 			-> Executor, ExecutorService, Callable, RunnableFuture, Future
+import java.util.concurrent.atomic.*; 	-> AtomicInteger, AtomicBoolean, AtomicLong
+import java.util.concurrent.locks.*; 	-> Lock, ReentrantLock, ReadWriteLock
+import java.time.*;			->Duration/Period/LocalDate/LocalTime/LocalDateTime
+import java.time.format*;	->DateTimeFormatter
+import java.text.*;			->NumberFormat, DecimalFormat, MessageFormat, DateFormat, SimpleDateFormat
+import java.io.*;			->File, InputStream, BufferedReader, Serializable, Console
+import java.sql.*;			->interface (Connection, ResultSet, PreparedStatement), class (DriverManager, Date, Time)
+import java.nio.file.*;		->Files, Paths, Path
+
+Points to remember
+------------------
+1. Effectively final variable cannot be changed anywhere after declaration (Though variable without final keyword)
+	a. Inside a method, local variable is created & used it for local class
+	b. Variable is created outside & used it for lambda expression
+	c. Variable is created outside & used it in try-with-resources
+2. stream1.findAny() mostly give the first element, but that is not always guaranteed
+3. Stateful lambda expression: Result depends on any state that might change during execution of pipeline. Stateless give always same result
